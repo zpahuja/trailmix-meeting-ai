@@ -169,6 +169,15 @@ Chat with meeting transcript: https://notes.granola.ai/d/393a95cf-4788-4a47-9deb
               </svg>
               Auto
             </button>
+            <button class="control-btn research-btn" id="researchButton" title="Research question from transcript">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <!-- Curved fishing pole icon -->
+                <path d="M20 4c0-1.1-.9-2-2-2s-2 .9-2 2c0 .74.4 1.38 1 1.72V7c0 0-1.5 2-5 5.5C8.5 16 6 18 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>
+                <path d="M6 18v2.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <circle cx="6" cy="22" r="1.5" fill="currentColor"/>
+                <circle cx="18" cy="4" r="1" fill="currentColor"/>
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -269,5 +278,16 @@ Chat with meeting transcript: https://notes.granola.ai/d/393a95cf-4788-4a47-9deb
         <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z" fill="currentColor"/>
       </svg>
     </button>
+
+    <!-- Research Results Pane -->
+    <div class="research-pane hidden" id="researchPane">
+      <div class="research-pane-header">
+        <h3>Research Results</h3>
+        <button class="research-pane-close" id="closeResearchPane">&times;</button>
+      </div>
+      <div class="research-pane-content" id="researchPaneContent">
+        <!-- Accordion items will be dynamically added here -->
+      </div>
+    </div>
   </body>
 </html>

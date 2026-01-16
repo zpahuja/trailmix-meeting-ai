@@ -48,6 +48,10 @@ const MODELS = {
   FALLBACKS: []
 };
 
+// Research API endpoints
+const YUTORI_API_URL = 'https://api.yutori.com/v1/research/tasks';
+const TINYFISH_API_URL = 'https://mino.ai/v1/automation/run';
+
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
@@ -1115,6 +1119,84 @@ ipcMain.handle('generateMeetingSummaryStreaming', async (event, meetingId) => {
   }
 });
 
+// Handle research question extraction and API calls
+ipcMain.handle('researchQuestion', async (event, meetingId) => {
+  try {
+    console.log(`Research question requested for meeting: ${meetingId}`);
+
+    // Read current data
+    const meetingsData = await fileOperationManager.readMeetingsData();
+
+    // Find the meeting
+    const meeting = meetingsData.pastMeetings.find(m => m.id === meetingId);
+    if (!meeting) {
+      return { success: false, error: 'Meeting not found' };
+    }
+
+    // Check if transcript exists
+    if (!meeting.transcript || meeting.transcript.length === 0) {
+      return { success: false, error: 'No transcript available for this meeting' };
+    }
+
+    console.log(`Found meeting with ${meeting.transcript.length} transcript entries`);
+
+    // Step 1: Generate meeting context summary
+    console.log('Generating meeting context summary...');
+    const contextSummary = await generateMeetingContext(meeting.transcript);
+    console.log('Context summary:', contextSummary);
+
+    // Step 2: Extract recent transcript (last 30 seconds)
+    const recentTranscript = extractRecentTranscript(meeting.transcript, 30);
+    console.log(`Extracted ${recentTranscript.length} recent transcript entries`);
+
+    // Step 3: Synthesize research question
+    console.log('Synthesizing research question...');
+    const question = await synthesizeResearchQuestion(contextSummary, recentTranscript);
+
+    if (!question) {
+      return { success: false, error: 'Could not synthesize a research question from the transcript' };
+    }
+
+    console.log('Synthesized question:', question);
+
+    // Send progress update to renderer
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('research-progress', {
+        meetingId,
+        phase: 'researching',
+        question
+      });
+    }
+
+    // Step 4: Query both APIs in parallel
+    console.log('Querying Yutori and Tinyfish APIs in parallel...');
+    const [yutoriResult, tinyfishResult] = await Promise.allSettled([
+      queryYutori(question),
+      queryTinyfish(question)
+    ]);
+
+    const result = {
+      success: true,
+      question,
+      contextSummary,
+      recentTranscript: recentTranscript.map(e => `${e.speaker}: ${e.text}`).join('\n'),
+      yutori: yutoriResult.status === 'fulfilled' ? yutoriResult.value : { success: false, error: yutoriResult.reason?.message || 'Unknown error' },
+      tinyfish: tinyfishResult.status === 'fulfilled' ? tinyfishResult.value : { success: false, error: tinyfishResult.reason?.message || 'Unknown error' }
+    };
+
+    console.log('Research completed:', {
+      question: result.question,
+      yutoriSuccess: result.yutori.success,
+      tinyfishSuccess: result.tinyfish.success
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error in researchQuestion:', error);
+    return { success: false, error: error.message };
+  }
+});
+
 // Handle loading meetings data
 ipcMain.handle('loadMeetingsData', async () => {
   try {
@@ -1691,6 +1773,192 @@ ${transcriptText}`
     }
   }
 }
+
+// ============== Research Question Feature Functions ==============
+
+// Extract the last N seconds of transcript
+function extractRecentTranscript(transcript, seconds = 30) {
+  if (!transcript || transcript.length === 0) return [];
+
+  const now = new Date();
+  const cutoffTime = new Date(now.getTime() - (seconds * 1000));
+
+  const recentEntries = transcript.filter(entry => {
+    return new Date(entry.timestamp) >= cutoffTime;
+  });
+
+  // If no recent entries within the time window, return the last 5 entries as fallback
+  if (recentEntries.length === 0) {
+    return transcript.slice(-5);
+  }
+
+  return recentEntries;
+}
+
+// Generate a quick context summary of the entire meeting
+async function generateMeetingContext(transcript) {
+  if (!transcript || transcript.length === 0) return null;
+
+  const transcriptText = transcript.map(entry =>
+    `${entry.speaker}: ${entry.text}`
+  ).join('\n');
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.PRIMARY,
+      messages: [
+        {
+          role: "system",
+          content: "You are a meeting summarizer. Provide a brief 2-3 sentence summary of the meeting context so far, focusing on the main topics being discussed. Be concise."
+        },
+        {
+          role: "user",
+          content: `Meeting transcript so far:\n${transcriptText}`
+        }
+      ],
+      max_tokens: 200,
+      temperature: 0.3
+    });
+
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error generating meeting context:', error);
+    return null;
+  }
+}
+
+// Synthesize a research question from meeting context and recent transcript
+async function synthesizeResearchQuestion(contextSummary, recentTranscript) {
+  const recentText = recentTranscript.map(entry =>
+    `${entry.speaker}: ${entry.text}`
+  ).join('\n');
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: MODELS.PRIMARY,
+      messages: [
+        {
+          role: "system",
+          content: `You are an assistant that identifies research questions from meeting conversations.
+Your task is to either:
+1. Extract a direct question if one was clearly asked in the recent conversation
+2. Synthesize a complete, multi-part research question from the discussion topics
+
+The question should be specific, actionable, and suitable for web research.
+Return ONLY the question, nothing else. Do not include any preamble or explanation.`
+        },
+        {
+          role: "user",
+          content: `Meeting Context:\n${contextSummary || 'No context available'}\n\nRecent Conversation (last 30 seconds):\n${recentText}`
+        }
+      ],
+      max_tokens: 500,
+      temperature: 0.3
+    });
+
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    console.error('Error synthesizing research question:', error);
+    return null;
+  }
+}
+
+// Query Yutori Research API
+async function queryYutori(question) {
+  const YUTORI_API_KEY = process.env.YUTORI_API_KEY;
+  if (!YUTORI_API_KEY) {
+    return { success: false, error: 'YUTORI_API_KEY not configured in environment' };
+  }
+
+  try {
+    // Create research task
+    const createResponse = await axios.post(YUTORI_API_URL,
+      { query: question },
+      {
+        headers: {
+          'X-API-Key': YUTORI_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    const taskId = createResponse.data.task_id;
+    console.log('Yutori task created:', taskId);
+
+    // Poll for completion (max 60 seconds, every 3 seconds)
+    const maxAttempts = 20;
+    for (let i = 0; i < maxAttempts; i++) {
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      const statusResponse = await axios.get(
+        `${YUTORI_API_URL}/${taskId}`,
+        { headers: { 'X-API-Key': YUTORI_API_KEY } }
+      );
+
+      console.log('Yutori task status:', statusResponse.data.status);
+
+      if (statusResponse.data.status === 'succeeded') {
+        return {
+          success: true,
+          result: statusResponse.data.result,
+          structured: statusResponse.data.structured_result
+        };
+      } else if (statusResponse.data.status === 'failed') {
+        return { success: false, error: 'Yutori research task failed' };
+      }
+      // Continue polling if 'queued' or 'running'
+    }
+
+    return { success: false, error: 'Yutori research timed out after 60 seconds' };
+  } catch (error) {
+    console.error('Error querying Yutori:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message
+    };
+  }
+}
+
+// Query Tinyfish/Mino API
+async function queryTinyfish(question) {
+  const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY;
+  if (!TINYFISH_API_KEY) {
+    return { success: false, error: 'TINYFISH_API_KEY not configured in environment' };
+  }
+
+  try {
+    const response = await axios.post(TINYFISH_API_URL,
+      {
+        url: 'https://perplexity.ai',
+        goal: question
+      },
+      {
+        headers: {
+          'X-API-Key': TINYFISH_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        timeout: 60000 // 60 second timeout
+      }
+    );
+
+    console.log('Tinyfish response status:', response.data.status);
+
+    return {
+      success: response.data.status === 'COMPLETED',
+      result: response.data.result,
+      runId: response.data.run_id,
+      error: response.data.status !== 'COMPLETED' ? response.data.error : null
+    };
+  } catch (error) {
+    console.error('Error querying Tinyfish:', error.response?.data || error.message);
+    return {
+      success: false,
+      error: error.response?.data?.message || error.message
+    };
+  }
+}
+
+// ============== End Research Question Feature Functions ==============
 
 // Function to update a note with recording information when recording ends
 async function updateNoteWithRecordingInfo(recordingId) {

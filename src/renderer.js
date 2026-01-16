@@ -25,6 +25,9 @@ let pastMeetingsByDate = {};
 window.isRecording = false;
 window.currentRecordingId = null;
 
+// Research pane state
+let researchItemCounter = 0;
+
 
 // Function to check if there's an active recording for the current note
 async function checkActiveRecordingState() {
@@ -2021,5 +2024,194 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
     }
   });
+
+  // ============== Research Question Feature ==============
+
+  // Research pane functions
+  function openResearchPane() {
+    const pane = document.getElementById('researchPane');
+    if (pane) {
+      pane.classList.remove('hidden');
+      document.querySelector('.app-container').classList.add('research-pane-open');
+    }
+  }
+
+  function closeResearchPane() {
+    const pane = document.getElementById('researchPane');
+    if (pane) {
+      pane.classList.add('hidden');
+      document.querySelector('.app-container').classList.remove('research-pane-open');
+    }
+  }
+
+  function addResearchItem({ loading = false }) {
+    const content = document.getElementById('researchPaneContent');
+    if (!content) return null;
+
+    const itemId = `research-item-${++researchItemCounter}`;
+
+    // Collapse all existing items
+    content.querySelectorAll('.research-item').forEach(item => {
+      item.classList.remove('expanded');
+      item.classList.add('collapsed');
+    });
+
+    // Create new expanded item
+    const item = document.createElement('div');
+    item.id = itemId;
+    item.className = 'research-item expanded';
+    item.innerHTML = loading ? `
+      <div class="research-item-header">
+        <span class="research-item-question">Analyzing transcript...</span>
+        <span class="research-item-toggle">▼</span>
+      </div>
+      <div class="research-item-body">
+        <div class="research-loading"><div class="spinner"></div>Synthesizing question...</div>
+      </div>
+    ` : '';
+
+    content.insertBefore(item, content.firstChild);
+    return itemId;
+  }
+
+  function updateResearchItem(itemId, result) {
+    const item = document.getElementById(itemId);
+    if (!item) return;
+
+    const questionPreview = result.question?.substring(0, 50) + (result.question?.length > 50 ? '...' : '');
+
+    item.innerHTML = `
+      <div class="research-item-header" onclick="window.toggleResearchItem('${itemId}')">
+        <span class="research-item-question">${escapeHtml(questionPreview) || 'Error'}</span>
+        <span class="research-item-toggle">▼</span>
+      </div>
+      <div class="research-item-body">
+        <div class="research-question-full">${escapeHtml(result.question) || 'Could not synthesize question'}</div>
+
+        <div class="research-result-section">
+          <h4>TinyFish Research <span class="status ${result.tinyfish?.success ? 'success' : 'error'}">
+            ${result.tinyfish?.success ? 'Complete' : 'Error'}</span></h4>
+          <div class="research-result-content">
+            ${formatResearchResult(result.tinyfish)}
+          </div>
+        </div>
+
+        <div class="research-result-section">
+          <h4>Yutori Research <span class="status ${result.yutori?.success ? 'success' : 'error'}">
+            ${result.yutori?.success ? 'Complete' : 'Error'}</span></h4>
+          <div class="research-result-content">
+            ${formatResearchResult(result.yutori)}
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function formatResearchResult(result) {
+    if (!result) return '<em>No response</em>';
+    if (!result.success) return `<em>Error: ${escapeHtml(result.error) || 'Unknown error'}</em>`;
+
+    let text;
+    if (typeof result.result === 'object' && result.result !== null) {
+      text = JSON.stringify(result.result, null, 2);
+    } else {
+      text = result.result;
+    }
+
+    if (!text) return '<em>Empty response</em>';
+
+    // Escape HTML and convert newlines to <br>
+    return escapeHtml(text).replace(/\n/g, '<br>');
+  }
+
+  // Make toggleResearchItem available globally for onclick
+  window.toggleResearchItem = function(itemId) {
+    const item = document.getElementById(itemId);
+    if (!item) return;
+
+    if (item.classList.contains('expanded')) {
+      item.classList.remove('expanded');
+      item.classList.add('collapsed');
+    } else {
+      item.classList.remove('collapsed');
+      item.classList.add('expanded');
+    }
+  };
+
+  // Research button click handler
+  const researchButton = document.getElementById('researchButton');
+  if (researchButton) {
+    researchButton.addEventListener('click', async () => {
+      if (!currentEditingMeetingId) {
+        alert('No meeting is currently open');
+        return;
+      }
+
+      // Check if meeting has transcript
+      const meeting = [...upcomingMeetings, ...pastMeetings].find(
+        m => m.id === currentEditingMeetingId
+      );
+
+      if (!meeting || !meeting.transcript || meeting.transcript.length === 0) {
+        alert('No transcript available to research. Please start recording first.');
+        return;
+      }
+
+      // Show loading state on button
+      const originalHTML = researchButton.innerHTML;
+      researchButton.classList.add('loading');
+      researchButton.disabled = true;
+
+      // Open pane and add loading item
+      openResearchPane();
+      const itemId = addResearchItem({ loading: true });
+
+      try {
+        const result = await window.electronAPI.researchQuestion(currentEditingMeetingId);
+
+        if (result.success) {
+          updateResearchItem(itemId, result);
+        } else {
+          updateResearchItem(itemId, {
+            question: 'Error',
+            tinyfish: { success: false, error: result.error || 'Unknown error' },
+            yutori: { success: false, error: result.error || 'Unknown error' }
+          });
+        }
+      } catch (error) {
+        console.error('Error researching question:', error);
+        updateResearchItem(itemId, {
+          question: 'Error',
+          tinyfish: { success: false, error: error.message || 'Unknown error' },
+          yutori: { success: false, error: error.message || 'Unknown error' }
+        });
+      } finally {
+        researchButton.innerHTML = originalHTML;
+        researchButton.classList.remove('loading');
+        researchButton.disabled = false;
+      }
+    });
+  }
+
+  // Close research pane button
+  const closeResearchPaneBtn = document.getElementById('closeResearchPane');
+  if (closeResearchPaneBtn) {
+    closeResearchPaneBtn.addEventListener('click', closeResearchPane);
+  }
+
+  // Listen for research progress updates
+  window.electronAPI.onResearchProgress((data) => {
+    console.log('Research progress:', data);
+    // Could update the loading item with the synthesized question here if needed
+  });
+
+  // ============== End Research Question Feature ==============
 
 });

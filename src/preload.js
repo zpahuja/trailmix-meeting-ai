@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   debugGetHandlers: () => ipcRenderer.invoke('debugGetHandlers'),
   checkForDetectedMeeting: () => ipcRenderer.invoke('checkForDetectedMeeting'),
   joinDetectedMeeting: () => ipcRenderer.invoke('joinDetectedMeeting'),
+  researchQuestion: (meetingId) => ipcRenderer.invoke('researchQuestion', meetingId),
   onOpenMeetingNote: (callback) => ipcRenderer.on('open-meeting-note', (_, meetingId) => callback(meetingId)),
   onRecordingCompleted: (callback) => ipcRenderer.on('recording-completed', (_, meetingId) => callback(meetingId)),
   onTranscriptUpdated: (callback) => ipcRenderer.on('transcript-updated', (_, meetingId) => callback(meetingId)),
@@ -34,5 +35,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onVideoFrame: (callback) => ipcRenderer.on('video-frame', (_, data) => callback(data)),
   onMeetingDetectionStatus: (callback) => ipcRenderer.on('meeting-detection-status', (_, data) => callback(data)),
   onMeetingTitleUpdated: (callback) => ipcRenderer.on('meeting-title-updated', (_, data) => callback(data)),
+  onResearchProgress: (callback) => ipcRenderer.on('research-progress', (_, data) => callback(data)),
   getActiveRecordingId: (noteId) => ipcRenderer.invoke('getActiveRecordingId', noteId)
 });
