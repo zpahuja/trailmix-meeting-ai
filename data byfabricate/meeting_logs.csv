@@ -1,0 +1,101 @@
+id,meeting_title,meeting_type,meeting_date,start_time,end_time,location,organizer,organizer_email,notes,status,created_at
+1,Team Retro,Retrospective,2026-01-13,11:00,11:45,Phone Call,James Wilson,james.wilson@hotmail.com,Meeting notes pending,rescheduled,2026-01-09T00:34:51.078Z
+2,Quarterly Board Meeting,Board Meeting,2025-12-25,12:00,12:30,Zoom,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-12-24T20:57:03.527Z
+3,Check-in Meeting,1-on-1,2026-01-08,13:30,15:00,Office - 3rd Floor,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2026-01-02T08:13:52.050Z
+4,Q4 Sprint Planning,Sprint Planning,2025-10-21,10:45,11:45,Slack Huddle,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-10-19T00:57:14.386Z
+5,Tool Training,Training Session,2025-11-19,09:15,10:00,Slack Huddle,James Wilson,james.wilson@hotmail.com,Meeting notes pending,rescheduled,2025-11-14T18:09:32.955Z
+6,Project Status Meeting,Status Update,2025-10-21,09:45,11:15,Skype,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-10-18T10:10:35.411Z
+7,Q3 Retrospective,Retrospective,2025-12-15,13:45,14:15,Zoom,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-12-13T23:14:55.361Z
+8,Executive Board Review,Board Meeting,2025-12-22,12:15,13:00,Microsoft Teams,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-19T03:51:31.587Z
+9,Goal Setting Workshop,Strategy Meeting,2025-12-02,14:15,15:15,Zoom,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-11-30T23:32:33.499Z
+10,Compliance Training,Training Session,2026-01-13,12:30,14:00,Phone Call,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2026-01-07T11:38:04.144Z
+11,Campaign Kickoff,Kickoff Meeting,2025-12-18,14:45,15:30,Google Meet,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-12-13T08:44:12.900Z
+12,Product Demo for New Client,Client Call,2025-10-31,13:00,13:30,Google Meet,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,rescheduled,2025-10-27T16:16:36.425Z
+13,Post-mortem Meeting,Retrospective,2026-01-01,11:45,12:45,Phone Call,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-12-29T08:32:36.891Z
+14,Sprint Retrospective,Retrospective,2026-01-02,09:45,10:30,In-person,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-12-29T18:58:36.684Z
+15,Weekly 1:1,1-on-1,2025-12-03,11:30,13:00,Conference Room A,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-03T14:59:02.464Z
+16,Quick Team Sync,Team Standup,2025-11-29,13:45,14:45,In-person,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-11-29T21:57:42.826Z
+17,Shareholder Update,Board Meeting,2025-11-26,10:15,11:00,Conference Room B,Amanda White,amanda.white@gmail.com,Meeting notes pending,rescheduled,2025-11-24T22:06:09.147Z
+18,Contract Negotiation Meeting,Client Call,2025-12-20,13:00,14:00,Conference Room B,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-18T12:56:01.365Z
+19,Team Retro,Retrospective,2025-11-04,13:30,14:30,Slack Huddle,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-10-30T14:51:29.747Z
+20,New Hire Training,Training Session,2025-11-20,11:00,12:30,Slack Huddle,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-11-19T01:23:03.615Z
+21,Department Update,Status Update,2025-11-20,09:00,10:30,Skype,James Wilson,james.wilson@hotmail.com,Meeting notes pending,rescheduled,2025-11-20T19:18:54.991Z
+22,Post-mortem Meeting,Retrospective,2025-11-17,13:30,14:15,Conference Room A,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-11-13T13:39:01.600Z
+23,Product Demo for New Client,Client Call,2025-11-30,12:00,13:00,Conference Room A,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-11-29T08:09:16.379Z
+24,Project Status Review,Project Review,2025-12-06,08:00,08:45,Skype,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-01T10:11:55.346Z
+25,Platform Walkthrough,Sales Demo,2025-10-29,08:00,09:30,Conference Room A,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,rescheduled,2025-10-24T18:21:10.466Z
+26,Department Update,Status Update,2025-11-03,09:15,09:45,Conference Room B,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-10-28T21:12:10.051Z
+27,Product Demo for New Client,Client Call,2025-11-28,11:00,11:45,Phone Call,James Wilson,james.wilson@hotmail.com,Meeting notes pending,cancelled,2025-11-28T07:59:34.702Z
+28,Progress Report Meeting,Status Update,2025-11-13,09:45,10:15,Microsoft Teams,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-11-09T01:33:59.492Z
+29,New Project Kickoff,Kickoff Meeting,2025-10-22,14:15,15:00,Phone Call,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-10-18T17:46:18.035Z
+30,Product Demo for New Client,Client Call,2025-12-02,14:15,15:45,Conference Room B,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-11-27T04:27:13.268Z
+31,Project Phoenix Review,Project Review,2025-10-26,15:30,16:30,Phone Call,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-10-25T07:57:04.431Z
+32,Project Kickoff,Kickoff Meeting,2026-01-08,16:45,18:15,Office - 3rd Floor,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2026-01-02T07:36:49.172Z
+33,Milestone Review,Project Review,2025-10-23,15:00,16:00,In-person,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,rescheduled,2025-10-18T20:36:11.690Z
+34,Weekly Status Update,Status Update,2025-11-03,10:30,11:00,Conference Room A,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-10-30T11:48:06.184Z
+35,Strategic Planning Session,Strategy Meeting,2026-01-08,08:45,10:15,Skype,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2026-01-04T21:54:27.384Z
+36,Q4 Business Review with Acme Corp,Client Call,2025-11-02,16:45,17:15,Conference Room B,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-10-29T09:01:31.220Z
+37,Project Phoenix Review,Project Review,2025-11-28,09:15,10:00,In-person,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-11-26T07:06:18.558Z
+38,Milestone Review,Project Review,2025-12-07,12:30,13:00,Zoom,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-12-05T05:32:30.354Z
+39,Executive Board Review,Board Meeting,2025-10-30,13:15,14:45,Microsoft Teams,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-10-26T04:48:15.410Z
+40,Career Development Chat,1-on-1,2025-11-16,13:30,14:30,Google Meet,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-11-12T15:24:36.282Z
+41,Check-in Meeting,1-on-1,2025-12-12,09:45,10:30,In-person,Amanda White,amanda.white@gmail.com,Meeting notes pending,rescheduled,2025-12-07T19:45:15.624Z
+42,Client Onboarding Session,Client Call,2025-12-24,10:30,11:30,Zoom,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-12-20T00:34:17.385Z
+43,Project Status Meeting,Status Update,2025-10-31,13:00,14:00,Zoom,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-10-28T18:25:18.008Z
+44,Sales Presentation,Sales Demo,2025-12-22,13:30,14:30,Zoom,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-18T04:07:39.328Z
+45,Sprint 24 Planning,Sprint Planning,2025-10-28,14:45,15:45,Skype,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-10-23T01:23:02.888Z
+46,Product Demo for New Client,Client Call,2025-11-18,14:00,14:45,Office - 3rd Floor,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,cancelled,2025-11-15T12:36:11.089Z
+47,Board of Directors Meeting,Board Meeting,2025-10-26,09:45,10:45,Zoom,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-10-23T22:23:37.425Z
+48,Goal Setting Workshop,Strategy Meeting,2025-11-28,14:15,14:45,Conference Room A,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-11-26T17:10:34.972Z
+49,Roadmap Discussion,Strategy Meeting,2025-10-27,09:15,10:45,Zoom,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-10-26T02:02:39.904Z
+50,Contract Negotiation Meeting,Client Call,2025-11-01,16:15,16:45,Google Meet,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-10-26T14:38:52.104Z
+51,New Project Kickoff,Kickoff Meeting,2025-11-13,09:45,10:45,Microsoft Teams,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-11-08T05:19:24.282Z
+52,Team Retro,Retrospective,2026-01-07,15:30,17:00,Skype,James Wilson,james.wilson@hotmail.com,Meeting notes pending,cancelled,2026-01-05T02:18:14.234Z
+53,Platform Walkthrough,Sales Demo,2025-10-21,12:30,13:30,Slack Huddle,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-10-19T06:21:10.617Z
+54,Performance Review Discussion,1-on-1,2025-12-25,09:15,10:00,Conference Room A,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-12-23T22:04:38.138Z
+55,Sprint Review Meeting,Project Review,2025-12-25,10:45,12:15,Office - 3rd Floor,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-12-25T16:20:05.294Z
+56,Initiative Launch Meeting,Kickoff Meeting,2025-11-03,15:15,16:45,Google Meet,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,cancelled,2025-10-28T17:01:51.303Z
+57,Quarterly Check-in Call,Client Call,2025-12-29,08:15,09:15,In-person,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,cancelled,2025-12-25T17:33:40.540Z
+58,Compliance Training,Training Session,2025-11-27,13:30,14:15,Google Meet,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-11-27T03:46:30.937Z
+59,Q4 Sprint Planning,Sprint Planning,2025-11-05,12:45,13:15,Conference Room A,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-11-05T10:47:23.954Z
+60,Post-mortem Meeting,Retrospective,2025-11-24,15:00,15:30,Conference Room B,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-11-19T01:39:55.316Z
+61,Compliance Training,Training Session,2025-11-20,14:15,15:15,Slack Huddle,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,rescheduled,2025-11-15T18:35:14.804Z
+62,Project Status Review,Project Review,2025-10-21,09:15,10:45,Google Meet,David Kim,david.kim@yahoo.com,Meeting notes pending,cancelled,2025-10-16T02:48:36.179Z
+63,Roadmap Discussion,Strategy Meeting,2026-01-05,08:30,10:00,Conference Room A,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,cancelled,2026-01-05T08:50:34.809Z
+64,Platform Walkthrough,Sales Demo,2025-12-15,11:45,12:30,In-person,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-12T18:12:14.771Z
+65,Platform Walkthrough,Sales Demo,2025-11-27,10:30,12:00,Google Meet,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,rescheduled,2025-11-25T18:09:44.646Z
+66,Feature Demo,Sales Demo,2025-12-07,12:15,13:00,Conference Room A,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-05T20:56:32.497Z
+67,Roadmap Discussion,Strategy Meeting,2025-11-27,13:30,14:15,Google Meet,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-11-25T23:42:43.680Z
+68,Project Status Meeting,Status Update,2025-12-15,09:30,10:30,In-person,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-12T01:12:41.033Z
+69,Lessons Learned,Retrospective,2025-12-19,08:30,09:15,Skype,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-12-17T15:54:55.033Z
+70,Check-in Meeting,1-on-1,2025-12-22,08:30,10:00,Zoom,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-16T00:39:06.114Z
+71,Team Standup,Team Standup,2025-12-29,09:45,10:45,Office - 3rd Floor,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-12-26T02:48:41.969Z
+72,Sprint Review Meeting,Project Review,2025-11-13,16:15,17:45,Google Meet,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-11-07T19:37:27.013Z
+73,Deliverables Review,Project Review,2025-11-05,10:45,11:30,Office - 3rd Floor,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-11-02T19:59:29.095Z
+74,1:1 with Team Member,1-on-1,2026-01-14,16:00,17:30,Microsoft Teams,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2026-01-10T02:09:17.230Z
+75,Client Onboarding Session,Client Call,2025-11-16,11:00,11:30,Conference Room A,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-11-13T18:49:49.774Z
+76,Product Training Workshop,Training Session,2025-12-02,08:30,10:00,Skype,David Kim,david.kim@yahoo.com,Meeting notes pending,rescheduled,2025-12-02T05:33:21.548Z
+77,Team Standup,Team Standup,2025-11-20,09:15,10:45,Google Meet,James Wilson,james.wilson@hotmail.com,Meeting notes pending,completed,2025-11-16T07:26:13.201Z
+78,Planning Session,Sprint Planning,2025-12-15,13:30,14:15,Office - 3rd Floor,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2025-12-15T18:18:02.587Z
+79,Weekly Status Update,Status Update,2026-01-04,08:45,10:15,Skype,David Kim,david.kim@yahoo.com,Meeting notes pending,completed,2026-01-02T00:27:49.915Z
+80,Board Presentation,Board Meeting,2025-12-03,09:45,10:30,Phone Call,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-01T00:31:39.742Z
+81,Goal Setting Workshop,Strategy Meeting,2025-12-27,14:45,15:30,Skype,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-12-23T22:47:42.548Z
+82,Project Kickoff,Kickoff Meeting,2026-01-01,10:15,11:45,Slack Huddle,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-27T01:21:17.543Z
+83,Career Development Chat,1-on-1,2025-12-10,15:30,16:30,Microsoft Teams,Jessica Martinez,jessica.martinez@gmail.com,Meeting notes pending,completed,2025-12-04T14:20:44.674Z
+84,Goal Setting Workshop,Strategy Meeting,2025-11-12,10:30,11:15,Zoom,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-11-07T05:37:58.320Z
+85,Goal Setting Workshop,Strategy Meeting,2025-12-26,16:45,17:30,Office - 3rd Floor,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,completed,2025-12-22T15:14:29.346Z
+86,Client Onboarding Session,Client Call,2026-01-16,16:30,17:15,Conference Room A,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2026-01-14T08:05:07.223Z
+87,Department Update,Status Update,2025-12-10,12:00,13:00,Phone Call,Amanda White,amanda.white@gmail.com,Meeting notes pending,cancelled,2025-12-10T23:22:39.228Z
+88,Q4 Business Review with Acme Corp,Client Call,2026-01-09,08:30,09:30,Google Meet,Amanda White,amanda.white@gmail.com,Meeting notes pending,rescheduled,2026-01-05T03:15:41.432Z
+89,Lessons Learned,Retrospective,2025-11-09,16:30,17:30,Google Meet,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-11-03T22:28:50.169Z
+90,Team Retro,Retrospective,2025-10-27,10:15,11:15,Conference Room B,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-10-21T08:49:41.163Z
+91,Project Status Review,Project Review,2025-12-13,12:00,12:30,Zoom,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-12-10T13:20:26.293Z
+92,Roadmap Discussion,Strategy Meeting,2025-12-31,08:30,09:15,In-person,Robert Taylor,robert.taylor@outlook.com,Meeting notes pending,completed,2025-12-28T11:55:28.454Z
+93,Daily Check-in,Team Standup,2025-12-18,08:15,08:45,Office - 3rd Floor,David Kim,david.kim@yahoo.com,Meeting notes pending,rescheduled,2025-12-13T11:28:50.243Z
+94,Project Phoenix Review,Project Review,2025-11-08,11:45,13:15,Phone Call,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-11-02T17:20:11.671Z
+95,Tool Training,Training Session,2026-01-02,08:45,09:45,Phone Call,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2025-12-28T17:01:19.248Z
+96,Deliverables Review,Project Review,2025-11-01,14:00,15:00,Phone Call,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-10-31T07:42:43.727Z
+97,Contract Negotiation Meeting,Client Call,2025-12-27,16:45,18:15,Conference Room B,Emily Rodriguez,emily.rodriguez@gmail.com,Meeting notes pending,cancelled,2025-12-24T14:05:26.522Z
+98,Product Demo - Enterprise Plan,Sales Demo,2025-11-27,14:00,14:45,Zoom,Amanda White,amanda.white@gmail.com,Meeting notes pending,completed,2025-11-23T20:30:42.319Z
+99,Quick Team Sync,Team Standup,2025-11-29,08:30,09:30,Phone Call,Michael Chen,michael.chen@outlook.com,Meeting notes pending,completed,2025-11-29T04:36:59.327Z
+100,Project Phoenix Review,Project Review,2026-01-04,13:45,14:30,Google Meet,Sarah Johnson,sarah.johnson@gmail.com,Meeting notes pending,completed,2026-01-02T06:16:03.020Z

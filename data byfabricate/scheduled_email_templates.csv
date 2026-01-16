@@ -1,0 +1,627 @@
+id,template_name,template_type,subject,body,send_time_type,is_active,created_at
+1,Meeting Follow-up - Action Items,followup,Follow-up: {{meeting_title}} - Action Items,"Hi team,
+
+Thank you for attending {{meeting_title}} on {{meeting_date}}. Here are the key action items we discussed:
+
+{{action_items}}
+
+Please let me know if you have any questions.
+
+Best regards,
+{{organizer_name}}",immediately_after,1,2025-10-30T05:16:08.768Z
+2,Meeting Reminder - 1 Day Before,reminder,Reminder: {{meeting_title}} Tomorrow,"Hi {{participant_name}},
+
+This is a friendly reminder that we have {{meeting_title}} scheduled for tomorrow at {{start_time}}.
+
+Location: {{location}}
+
+Looking forward to seeing you there.
+
+Best,
+{{organizer_name}}",1_day_before,1,2025-11-15T07:19:57.290Z
+3,Meeting Reminder - 1 Hour Before,reminder,Starting Soon: {{meeting_title}},"Hi {{participant_name}},
+
+{{meeting_title}} will begin in 1 hour at {{start_time}}.
+
+Join here: {{location}}
+
+See you soon!",1_hour_before,1,2025-11-17T20:34:04.226Z
+4,Weekly Status Update,status_update,Weekly Status Update - Week of {{week_date}},"Team,
+
+Here's our weekly status update:
+
+**Completed:**
+{{completed_items}}
+
+**In Progress:**
+{{in_progress_items}}
+
+**Upcoming:**
+{{upcoming_items}}
+
+Let me know if you have any concerns.
+
+Thanks,
+{{sender_name}}",weekly_monday,1,2026-01-01T13:17:05.734Z
+5,Project Milestone Achieved,status_update,🎉 Milestone Achieved: {{milestone_name}},"Great news team!
+
+We've successfully achieved {{milestone_name}}. Thank you all for your hard work and dedication.
+
+{{milestone_details}}
+
+Next steps:
+{{next_steps}}
+
+Cheers,
+{{sender_name}}",immediately,1,2025-11-20T12:37:15.794Z
+6,Meeting Notes Summary,followup,Meeting Notes: {{meeting_title}},"Hello everyone,
+
+Please find the notes from today's {{meeting_title}}:
+
+**Attendees:**
+{{attendees}}
+
+**Key Discussion Points:**
+{{discussion_points}}
+
+**Decisions Made:**
+{{decisions}}
+
+**Action Items:**
+{{action_items}}
+
+Feel free to reply with any additions or corrections.
+
+Regards,
+{{organizer_name}}",2_hours_after,1,2025-12-09T17:30:31.645Z
+7,Client Meeting Follow-up,followup,Thank you for meeting with us,"Dear {{client_name}},
+
+Thank you for taking the time to meet with us today. We appreciated the opportunity to discuss {{discussion_topic}}.
+
+As promised, here are the next steps:
+{{next_steps}}
+
+We will follow up with you by {{followup_date}}. Please don't hesitate to reach out if you have any questions.
+
+Best regards,
+{{sender_name}}",3_hours_after,0,2025-12-27T14:03:16.102Z
+8,Daily Standup Reminder,reminder,Daily Standup in 15 minutes,"Quick reminder - daily standup starts in 15 minutes!
+
+Join: {{meeting_link}}
+
+See you there!",15_minutes_before,1,2025-11-10T16:15:02.316Z
+9,Sprint Planning Preparation,reminder,Please Review Before Sprint Planning,"Hi team,
+
+Our sprint planning is scheduled for {{meeting_date}} at {{start_time}}. Please review the following before the meeting:
+
+- Backlog items: {{backlog_link}}
+- Previous sprint retrospective notes
+- Your capacity for the upcoming sprint
+
+Thanks,
+{{organizer_name}}",2_days_before,1,2025-11-30T20:32:59.102Z
+10,Monthly Team Update,status_update,Monthly Update - {{month_year}},"Team,
+
+Here's our monthly update for {{month_year}}:
+
+**Highlights:**
+{{highlights}}
+
+**Metrics:**
+{{metrics}}
+
+**Upcoming Focus Areas:**
+{{focus_areas}}
+
+Great work everyone!
+
+{{sender_name}}",monthly_first_monday,0,2025-11-23T11:19:03.985Z
+11,Retrospective Action Items,followup,Retrospective Action Items - {{sprint_name}},"Team,
+
+Here are the action items from our retrospective:
+
+{{action_items}}
+
+Let's make sure to address these in the next sprint.
+
+{{organizer_name}}",immediately_after,1,2025-11-01T04:32:00.541Z
+12,Meeting Cancellation Notice,notification,Cancelled: {{meeting_title}},"Hi {{participant_name}},
+
+Unfortunately, we need to cancel {{meeting_title}} scheduled for {{meeting_date}}.
+
+{{cancellation_reason}}
+
+We will reschedule soon.
+
+Apologies for any inconvenience.
+
+{{organizer_name}}",immediately,0,2026-01-06T06:46:32.420Z
+13,Meeting Reschedule Notice,notification,Rescheduled: {{meeting_title}},"Hi {{participant_name}},
+
+{{meeting_title}} has been rescheduled.
+
+New date/time: {{new_date}} at {{new_time}}
+Location: {{location}}
+
+Please update your calendar.
+
+{{organizer_name}}",immediately,1,2025-10-23T15:47:25.737Z
+14,Quarterly Business Review Reminder,reminder,QBR Next Week: Prepare Your Updates,"Team,
+
+Our Quarterly Business Review is next week on {{meeting_date}}.
+
+Please prepare:
+- Q{{quarter}} achievements
+- Key metrics
+- Challenges faced
+- Q{{next_quarter}} goals
+
+See you then!
+
+{{organizer_name}}",1_week_before,1,2025-12-23T11:03:16.217Z
+15,1-on-1 Agenda Request,reminder,1:1 Tomorrow - Agenda Items?,"Hi {{participant_name}},
+
+We have our 1:1 tomorrow at {{start_time}}.
+
+Do you have any specific topics you'd like to discuss? Feel free to add them to our shared doc: {{agenda_link}}
+
+Looking forward to it!
+
+{{organizer_name}}",1_day_before,1,2025-11-15T22:12:52.603Z
+16,Board Meeting Prep Checklist,reminder,Board Meeting Preparation - {{meeting_date}},"Team,
+
+Board meeting prep checklist:
+
+☐ Financial reports finalized
+☐ Presentations reviewed
+☐ Q&A preparation complete
+☐ Supporting documents uploaded
+
+Deadline: {{deadline_date}}
+
+Thanks,
+{{organizer_name}}",1_week_before,1,2025-11-10T22:09:24.577Z
+17,Client Demo Follow-up with Resources,followup,Resources from Today's Demo,"Hi {{client_name}},
+
+Thank you for attending our product demo today! As promised, here are some resources:
+
+{{resource_links}}
+
+Would you like to schedule a follow-up call to discuss implementation?
+
+Best regards,
+{{sender_name}}",1_hour_after,1,2025-12-28T11:17:33.918Z
+18,Team Standup Summary,status_update,Standup Summary - {{date}},"Team updates from today's standup:
+
+{{team_updates}}
+
+Blockers:
+{{blockers}}
+
+Let's keep the momentum going!
+
+{{sender_name}}",immediately_after,1,2025-11-14T03:43:12.911Z
+19,Project Kickoff Welcome,notification,Welcome to {{project_name}}!,"Hi team,
+
+Welcome to {{project_name}}! We're excited to have you on board.
+
+**Key Information:**
+Project start: {{start_date}}
+Expected completion: {{end_date}}
+Project lead: {{project_lead}}
+
+**Important Links:**
+{{project_links}}
+
+Let's make this a success!
+
+{{organizer_name}}",immediately,1,2026-01-07T15:13:40.074Z
+20,Training Session Reminder with Materials,reminder,Training Tomorrow: {{training_topic}},"Hi {{participant_name}},
+
+Reminder: {{training_topic}} training tomorrow at {{start_time}}.
+
+Pre-reading materials: {{materials_link}}
+
+Please review before the session.
+
+Location: {{location}}
+
+See you there!
+
+{{trainer_name}}",1_day_before,1,2025-12-23T23:42:19.605Z
+21,End of Sprint Celebration,notification,🎉 Sprint {{sprint_number}} Complete!,"Amazing work team!
+
+We've completed Sprint {{sprint_number}}!
+
+**Sprint Highlights:**
+{{sprint_highlights}}
+
+**Velocity:** {{velocity}}
+
+Let's celebrate our wins in tomorrow's retro.
+
+Great job everyone!
+
+{{sender_name}}",immediately,1,2025-12-24T15:41:46.856Z
+22,Overdue Action Items Reminder,reminder,Action Items Overdue - Please Update,"Hi {{assigned_person}},
+
+The following action items are overdue:
+
+{{overdue_items}}
+
+Could you please provide a status update?
+
+Thanks,
+{{sender_name}}",1_day_after_due,1,2025-12-01T17:37:09.079Z
+23,Meeting Room Change Notice,notification,Room Change: {{meeting_title}},"Hi team,
+
+The location for {{meeting_title}} has changed:
+
+Original: {{old_location}}
+New: {{new_location}}
+
+Date/Time remains the same: {{meeting_date}} at {{start_time}}
+
+{{organizer_name}}",immediately,1,2025-12-22T04:37:57.225Z
+24,Client Check-in Request,followup,Time for a Check-in?,"Hi {{client_name}},
+
+It's been {{time_period}} since we last connected. I wanted to check in and see how things are going with {{product_service}}.
+
+Would you have time for a brief call next week?
+
+Best,
+{{sender_name}}",scheduled,1,2025-11-19T19:12:38.679Z
+25,Quarterly Goal Review,reminder,Q{{quarter}} Goal Review Meeting,"Team,
+
+Time to review our Q{{quarter}} goals!
+
+Meeting: {{meeting_date}} at {{start_time}}
+
+Please review your OKRs and prepare updates on:
+- Progress to date
+- Challenges
+- Support needed
+
+Doc: {{goals_link}}
+
+{{organizer_name}}",3_days_before,1,2025-12-16T22:32:34.117Z
+26,New Feature Launch Announcement,notification,🚀 New Feature Launch: {{feature_name}},"Exciting news!
+
+We're launching {{feature_name}} today!
+
+**What it does:**
+{{feature_description}}
+
+**How to use it:**
+{{usage_instructions}}
+
+Documentation: {{docs_link}}
+
+Questions? Reach out to {{support_contact}}
+
+Cheers,
+{{sender_name}}",immediately,1,2025-12-13T08:32:15.639Z
+27,Performance Review Prep,reminder,Performance Review Preparation,"Hi {{employee_name}},
+
+Your performance review is scheduled for {{review_date}} at {{review_time}}.
+
+Please complete your self-assessment by {{deadline_date}}:
+{{self_assessment_link}}
+
+Looking forward to our discussion.
+
+{{manager_name}}",1_week_before,1,2026-01-09T05:58:15.849Z
+28,Budget Meeting Preparation,reminder,Budget Meeting Prep - {{fiscal_year}},"Hi team,
+
+Budget planning meeting: {{meeting_date}} at {{start_time}}
+
+Please prepare:
+- {{fiscal_year}} budget requests
+- Justification for increases
+- Cost-saving initiatives
+
+Template: {{budget_template_link}}
+
+{{organizer_name}}",5_days_before,1,2025-10-30T10:19:46.446Z
+29,Incident Post-Mortem Followup,followup,Post-Mortem: {{incident_name}},"Team,
+
+Thank you for attending the post-mortem for {{incident_name}}.
+
+**Root Cause:**
+{{root_cause}}
+
+**Action Items:**
+{{action_items}}
+
+**Timeline:**
+{{timeline}}
+
+Full report: {{report_link}}
+
+{{organizer_name}}",immediately_after,0,2025-12-12T12:14:25.134Z
+30,All-Hands Meeting Reminder,reminder,All-Hands Meeting This {{day_of_week}},"Team,
+
+Reminder: All-Hands meeting this {{day_of_week}} at {{start_time}}.
+
+**Agenda:**
+{{agenda_items}}
+
+Join: {{meeting_link}}
+
+See you there!
+
+{{organizer_name}}",3_hours_before,1,2025-12-31T21:37:17.777Z
+31,Sales Pipeline Review,reminder,Sales Pipeline Review - {{review_date}},"Sales team,
+
+Pipeline review tomorrow at {{start_time}}.
+
+Please update your deals in Salesforce and be prepared to discuss:
+- Top 3 opportunities
+- At-risk deals
+- Support needed
+
+See you then!
+
+{{sales_leader}}",1_day_before,1,2025-11-22T03:50:28.718Z
+32,Customer Success Check-in,followup,How are things going with {{product_name}}?,"Hi {{customer_name}},
+
+I wanted to check in and see how your experience with {{product_name}} has been.
+
+Are there any questions or concerns I can help address?
+
+I'd love to schedule a quick call if you have 15 minutes.
+
+Best,
+{{sender_name}}",30_days_after_onboarding,1,2025-12-11T00:14:48.706Z
+33,Team Building Event Invite,notification,You're Invited: Team Building Event,"Hi team!
+
+📅 {{event_name}}
+🗓️ {{event_date}} at {{event_time}}
+📍 {{event_location}}
+
+{{event_description}}
+
+Please RSVP by {{rsvp_date}}: {{rsvp_link}}
+
+Looking forward to seeing you all!
+
+{{organizer_name}}",2_weeks_before,1,2025-11-15T03:53:36.988Z
+34,Vendor Meeting Recap,followup,Meeting Recap: {{vendor_name}},"Hi {{vendor_name}},
+
+Thank you for meeting with us today. Here's a quick recap:
+
+**Discussed:**
+{{discussion_summary}}
+
+**Agreed Actions:**
+{{agreed_actions}}
+
+**Next Steps:**
+{{next_steps}}
+
+Next meeting: {{next_meeting_date}}
+
+Best regards,
+{{sender_name}}",immediately_after,1,2025-12-15T06:34:11.760Z
+35,Design Review Feedback,followup,Design Review Feedback - {{design_name}},"Hi {{designer_name}},
+
+Thank you for presenting {{design_name}} today. Here's the feedback from the team:
+
+{{feedback_summary}}
+
+**Approved items:**
+{{approved_items}}
+
+**Needs revision:**
+{{revision_items}}
+
+Let me know if you have questions!
+
+{{reviewer_name}}",immediately_after,1,2025-12-17T13:53:13.239Z
+36,Code Review Meeting Summary,followup,Code Review Summary - {{pr_number}},"Team,
+
+Code review summary for {{pr_number}}:
+
+**Reviewed:**
+{{reviewed_files}}
+
+**Issues Found:**
+{{issues}}
+
+**Action Items:**
+{{action_items}}
+
+Please address feedback by {{deadline}}.
+
+{{reviewer_name}}",immediately_after,1,2025-12-12T09:39:08.559Z
+37,Partnership Discussion Followup,followup,Following up on Partnership Discussion,"Hi {{partner_name}},
+
+It was great discussing potential partnership opportunities today.
+
+As discussed, here are the next steps:
+{{next_steps}}
+
+I'll send over the partnership proposal by {{proposal_date}}.
+
+Excited to explore this further!
+
+Best,
+{{sender_name}}",1_day_after,1,2025-11-03T03:40:04.092Z
+38,Employee Onboarding Checklist,notification,Welcome {{new_hire_name}}! Your First Week,"Hi {{new_hire_name}},
+
+Welcome to the team! Here's your first week schedule:
+
+{{week_schedule}}
+
+**First Day Checklist:**
+{{onboarding_checklist}}
+
+**Important Links:**
+{{resource_links}}
+
+Your buddy: {{buddy_name}} ({{buddy_email}})
+
+Excited to have you on board!
+
+{{hr_manager}}",3_days_before_start,1,2025-10-28T08:05:55.952Z
+39,Security Review Reminder,reminder,Security Review Required - {{project_name}},"Hi {{project_lead}},
+
+Security review for {{project_name}} is required before launch.
+
+Meeting: {{meeting_date}} at {{start_time}}
+
+Please complete the security questionnaire: {{questionnaire_link}}
+
+Deadline: {{deadline_date}}
+
+{{security_team}}",1_week_before,1,2025-12-13T17:34:31.398Z
+40,Innovation Workshop Invitation,notification,Join Our Innovation Workshop!,"Hi team,
+
+🚀 Innovation Workshop: {{workshop_name}}
+📅 {{workshop_date}} at {{workshop_time}}
+
+We'll be exploring:
+{{workshop_topics}}
+
+Bring your ideas and creativity!
+
+RSVP: {{rsvp_link}}
+
+{{organizer_name}}",2_weeks_before,1,2025-10-28T03:54:23.772Z
+41,Contract Review Meeting,reminder,Contract Review: {{contract_name}},"Legal team,
+
+Contract review meeting tomorrow at {{start_time}}.
+
+Contract: {{contract_name}}
+Party: {{other_party}}
+
+Please review the draft: {{contract_link}}
+
+Key concerns to discuss:
+{{key_concerns}}
+
+{{legal_lead}}",1_day_before,1,2025-11-10T20:07:03.262Z
+42,Product Roadmap Update,status_update,Product Roadmap Update - {{quarter}},"Team,
+
+Updated product roadmap for {{quarter}}:
+
+**Shipping This Quarter:**
+{{q_features}}
+
+**In Discovery:**
+{{discovery_items}}
+
+**On Hold:**
+{{on_hold_items}}
+
+Full roadmap: {{roadmap_link}}
+
+Questions? Let's discuss in our next sync.
+
+{{product_manager}}",monthly_first_monday,0,2026-01-12T13:42:33.671Z
+43,Stakeholder Update Request,reminder,Stakeholder Update Needed - {{project_name}},"Hi {{project_lead}},
+
+Time for your stakeholder update on {{project_name}}.
+
+Please submit your update by {{deadline_date}}:
+{{update_form_link}}
+
+Include:
+- Progress this period
+- Upcoming milestones
+- Risks/blockers
+- Budget status
+
+Thanks,
+{{program_manager}}",3_days_before_deadline,1,2025-11-30T07:11:43.914Z
+44,Crisis Management Meeting,notification,URGENT: Crisis Management Meeting,"Team,
+
+Crisis management meeting NOW.
+
+Join: {{emergency_meeting_link}}
+
+Situation: {{crisis_description}}
+
+All hands on deck.
+
+{{incident_commander}}",immediately,1,2025-11-02T14:59:03.996Z
+45,Customer Feedback Session,reminder,Customer Feedback Session Tomorrow,"Product team,
+
+Customer feedback session tomorrow at {{start_time}}.
+
+**Customers Attending:**
+{{customer_list}}
+
+**Topics:**
+{{discussion_topics}}
+
+Please review customer profiles: {{profiles_link}}
+
+Join: {{meeting_link}}
+
+{{organizer_name}}",1_day_before,1,2025-11-15T11:25:47.846Z
+46,Compliance Training Reminder,reminder,Compliance Training Due: {{training_name}},"Hi {{employee_name}},
+
+Reminder: {{training_name}} must be completed by {{deadline_date}}.
+
+Time required: {{duration}} minutes
+
+Access training: {{training_link}}
+
+This is mandatory for all employees.
+
+{{compliance_team}}",3_days_before_deadline,1,2026-01-11T10:28:16.384Z
+47,Leadership Team Sync,reminder,Leadership Sync - {{meeting_date}},"Leadership team,
+
+Our weekly sync is {{day_of_week}} at {{start_time}}.
+
+**Agenda:**
+{{agenda_items}}
+
+Please submit your updates: {{updates_link}}
+
+Join: {{meeting_link}}
+
+{{ceo_name}}",1_day_before,1,2025-10-19T08:15:39.933Z
+48,Product Launch Checklist,reminder,Launch Day Checklist - {{product_name}},"Launch team,
+
+{{product_name}} launches in {{days_until_launch}} days!
+
+**Pre-Launch Checklist:**
+{{launch_checklist}}
+
+**Launch Day Schedule:**
+{{launch_schedule}}
+
+Let's make this a successful launch!
+
+{{launch_lead}}",7_days_before,1,2025-11-17T05:26:47.831Z
+49,Team Retrospective Summary,followup,Retro Summary & Action Items,"Team,
+
+Thank you for a great retrospective!
+
+**What Went Well:**
+{{went_well}}
+
+**What Could Improve:**
+{{improvements}}
+
+**Action Items:**
+{{action_items}}
+
+Let's revisit these in our next retro.
+
+{{facilitator_name}}",immediately_after,1,2025-12-17T10:15:40.369Z
+50,Investor Update Preparation,reminder,Investor Update Due - {{month}},"Finance team,
+
+Monthly investor update is due {{deadline_date}}.
+
+Required sections:
+- Financial metrics
+- Key achievements
+- Challenges & risks
+- Upcoming milestones
+
+Template: {{template_link}}
+
+{{cfo_name}}",5_days_before_deadline,0,2025-11-16T13:43:51.058Z
