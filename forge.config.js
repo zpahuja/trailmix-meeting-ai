@@ -6,21 +6,27 @@ module.exports = {
     asar: {
       unpackDir: "node_modules/@recallai"
     },
-    osxSign: {
-      continueOnError: false,
-      optionsForFile: (_) => {
-        // Here, we keep it simple and return a single entitlements.plist file.
-        // You can use this callback to map different sets of entitlements
-        // to specific files in your packaged app.
-        return {
-          entitlements: './Entitlements.plist'
-        };
-      }
-    },
+    // Comment out osxSign for development builds without a signing certificate
+    // Uncomment and configure when you have a valid signing identity
+    // osxSign: {
+    //   continueOnError: false,
+    //   optionsForFile: (_) => {
+    //     // Here, we keep it simple and return a single entitlements.plist file.
+    //     // You can use this callback to map different sets of entitlements
+    //     // to specific files in your packaged app.
+    //     return {
+    //       entitlements: './Entitlements.plist'
+    //     };
+    //   }
+    // },
     icon: './trailmix',
     extendInfo: {
       NSUserNotificationAlertStyle: "alert",
-    }
+    },
+    // Include .env file in the packaged app
+    extraResource: [
+      '.env'
+    ]
   },
   rebuildConfig: {},
   makers: [

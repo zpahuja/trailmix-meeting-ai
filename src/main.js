@@ -6,7 +6,22 @@ const RecallAiSdk = require('@recallai/desktop-sdk');
 const axios = require('axios');
 const OpenAI = require('openai');
 const sdkLogger = require('./sdk-logger');
-require('dotenv').config();
+
+// Load .env file from the correct location based on whether app is packaged
+if (app.isPackaged) {
+  // In packaged mode, .env is in the Resources directory
+  const envPath = path.join(process.resourcesPath, '.env');
+  require('dotenv').config({ path: envPath });
+} else {
+  // In development mode, .env is in the project root
+  require('dotenv').config();
+}
+
+// Set app name (shows in menu bar and dock)
+app.name = 'Trailmix';
+if (app.setName) {
+  app.setName('Trailmix');
+}
 
 // Function to get the OpenRouter headers
 function getHeaderLines() {
@@ -29,7 +44,7 @@ const openai = new OpenAI({
 // Define available models with their capabilities
 const MODELS = {
   // Primary models
-  PRIMARY: "anthropic/claude-3.7-sonnet",
+  PRIMARY: "anthropic/claude-sonnet-4.5",
   FALLBACKS: []
 };
 
@@ -44,8 +59,19 @@ let detectedMeeting = null;
 let mainWindow;
 
 const createWindow = () => {
+  // Determine the icon path - in development it's in the project root
+  // In production/packaged mode, it will be handled by the packager config
+  let iconPath = null;
+  if (!app.isPackaged) {
+    // Development mode - icon is in project root
+    const devIconPath = path.join(__dirname, '../../trailmix.icns');
+    if (fs.existsSync(devIconPath)) {
+      iconPath = devIconPath;
+    }
+  }
+
   // Create the browser window.
-  mainWindow = new BrowserWindow({
+  const windowOptions = {
     width: 1024,
     height: 768,
     webPreferences: {
@@ -55,7 +81,15 @@ const createWindow = () => {
     },
     titleBarStyle: 'hiddenInset',
     backgroundColor: '#f9f9f9',
-  });
+    title: 'Trailmix',
+  };
+
+  // Add icon if we found one (development mode)
+  if (iconPath) {
+    windowOptions.icon = iconPath;
+  }
+
+  mainWindow = new BrowserWindow(windowOptions);
 
   // Allow the debug panel header to act as a drag region
   mainWindow.on('ready-to-show', () => {
