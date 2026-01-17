@@ -24,7 +24,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   debugGetHandlers: () => ipcRenderer.invoke('debugGetHandlers'),
   checkForDetectedMeeting: () => ipcRenderer.invoke('checkForDetectedMeeting'),
   joinDetectedMeeting: () => ipcRenderer.invoke('joinDetectedMeeting'),
-  researchQuestion: (meetingId) => ipcRenderer.invoke('researchQuestion', meetingId),
+  researchQuestion: (meetingId, requestId) => ipcRenderer.invoke('researchQuestion', meetingId, requestId),
   onOpenMeetingNote: (callback) => ipcRenderer.on('open-meeting-note', (_, meetingId) => callback(meetingId)),
   onRecordingCompleted: (callback) => ipcRenderer.on('recording-completed', (_, meetingId) => callback(meetingId)),
   onTranscriptUpdated: (callback) => ipcRenderer.on('transcript-updated', (_, meetingId) => callback(meetingId)),

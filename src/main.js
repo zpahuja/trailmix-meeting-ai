@@ -50,7 +50,6 @@ const MODELS = {
 
 // Research API endpoints
 const YUTORI_API_URL = 'https://api.yutori.com/v1/research/tasks';
-const TINYFISH_API_URL = 'https://mino.ai/v1/automation/run';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
@@ -1120,10 +1119,10 @@ ipcMain.handle('generateMeetingSummaryStreaming', async (event, meetingId) => {
 });
 
 // Handle research question extraction and API calls (non-blocking with progress updates)
-ipcMain.handle('researchQuestion', async (event, meetingId) => {
+ipcMain.handle('researchQuestion', async (event, meetingId, requestId) => {
   const sendProgress = (phase, data) => {
     if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('research-progress', { meetingId, phase, ...data });
+      mainWindow.webContents.send('research-progress', { meetingId, requestId, phase, ...data });
     }
   };
 
@@ -1172,32 +1171,19 @@ ipcMain.handle('researchQuestion', async (event, meetingId) => {
 
     // Step 4: Start fishing (query APIs)
     sendProgress('fishing', { status: 'in_progress' });
-    console.log('Querying Tinyfish and Yutori APIs...');
+    console.log('Querying Groq API...');
 
-    // Query Tinyfish first (usually faster), send update when done
-    const tinyfishPromise = queryTinyfish(question).then(result => {
-      console.log('Tinyfish completed');
-      sendProgress('tinyfish', { status: result.success ? 'complete' : 'error', result });
+    // Query Groq (fast inference)
+    const groqResult = await queryGroq(question).then(result => {
+      console.log('Groq completed');
+      sendProgress('groq', { status: result.success ? 'complete' : 'error', result });
       return result;
     }).catch(error => {
       const result = { success: false, error: error.message };
-      sendProgress('tinyfish', { status: 'error', result });
+      sendProgress('groq', { status: 'error', result });
       return result;
     });
 
-    // Yutori disabled - was freezing the pipeline
-    // const yutoriPromise = queryYutori(question).then(result => {
-    //   console.log('Yutori completed');
-    //   sendProgress('yutori', { status: result.success ? 'complete' : 'error', result });
-    //   return result;
-    // }).catch(error => {
-    //   const result = { success: false, error: error.message };
-    //   sendProgress('yutori', { status: 'error', result });
-    //   return result;
-    // });
-
-    // Wait for Tinyfish to complete (Yutori disabled)
-    const tinyfishResult = await tinyfishPromise;
     const yutoriResult = { success: false, error: 'Yutori temporarily disabled' };
     sendProgress('yutori', { status: 'disabled', result: yutoriResult });
 
@@ -1208,13 +1194,13 @@ ipcMain.handle('researchQuestion', async (event, meetingId) => {
       question,
       contextSummary,
       recentTranscript: recentTranscript.map(e => `${e.speaker}: ${e.text}`).join('\n'),
-      tinyfish: tinyfishResult,
+      groq: groqResult,
       yutori: yutoriResult
     };
 
     console.log('Research completed:', {
       question: result.question,
-      tinyfishSuccess: result.tinyfish.success
+      groqSuccess: result.groq.success
     });
 
     return result;
@@ -1947,41 +1933,53 @@ async function queryYutori(question) {
   }
 }
 
-// Query Tinyfish/Mino API
-async function queryTinyfish(question) {
-  const TINYFISH_API_KEY = process.env.TINYFISH_API_KEY;
-  if (!TINYFISH_API_KEY) {
-    return { success: false, error: 'TINYFISH_API_KEY not configured in environment' };
+// Query Groq API - fast inference for quick answers (using OpenAI SDK for compatibility)
+async function queryGroq(question) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
+  console.log('GROQ_API_KEY loaded:', GROQ_API_KEY ? `yes (${GROQ_API_KEY.length} chars, starts: ${GROQ_API_KEY.substring(0,4)})` : 'NO');
+
+  if (!GROQ_API_KEY) {
+    return { success: false, error: 'GROQ_API_KEY not configured in environment' };
   }
 
   try {
-    const response = await axios.post(TINYFISH_API_URL,
-      {
-        url: 'https://perplexity.ai',
-        goal: question
-      },
-      {
-        headers: {
-          'X-API-Key': TINYFISH_API_KEY,
-          'Content-Type': 'application/json'
-        },
-        timeout: 300000 // 5 minute timeout
-      }
-    );
+    const OpenAI = require('openai');
+    const groq = new OpenAI({
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: GROQ_API_KEY
+    });
 
-    console.log('Tinyfish response status:', response.data.status);
+    const systemPrompt = `You are a helpful research assistant. Answer the user's question concisely with exactly 3 bullet points:
+- First bullet: The direct answer(s) to the question (if asking for products/items, list the top 3 most relevant)
+- Second bullet: Important context or consideration
+- Third bullet: Additional relevant information
+
+Keep each bullet succinct (1-2 sentences max). Do not use sub-bullets. Start each bullet with "• ".`;
+
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: question }
+      ],
+      max_tokens: 500,
+      temperature: 0.7
+    });
+
+    const content = response.choices?.[0]?.message?.content;
+    console.log('Groq response received');
 
     return {
-      success: response.data.status === 'COMPLETED',
-      result: response.data.result,
-      runId: response.data.run_id,
-      error: response.data.status !== 'COMPLETED' ? response.data.error : null
+      success: true,
+      result: content,
+      model: response.model,
+      usage: response.usage
     };
   } catch (error) {
-    console.error('Error querying Tinyfish:', error.response?.data || error.message);
+    console.error('Error querying Groq:', error.message);
     return {
       success: false,
-      error: error.response?.data?.message || error.message
+      error: error.message
     };
   }
 }

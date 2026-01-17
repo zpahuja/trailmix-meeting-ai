@@ -27,6 +27,8 @@ window.currentRecordingId = null;
 
 // Research pane state
 let researchItemCounter = 0;
+let researchRequestCounter = 0;
+const activeResearchItems = new Map(); // Maps requestId -> itemId
 
 
 // Function to check if there's an active recording for the current note
@@ -2027,9 +2029,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ============== Research Question Feature ==============
 
-  // Track current research item for progress updates
-  let currentResearchItemId = null;
-
   // Research pane functions
   function openResearchPane() {
     const pane = document.getElementById('researchPane');
@@ -2092,8 +2091,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           </div>
         </div>
 
-        <div class="research-result-section" id="${itemId}-tinyfish" style="display: none;">
-          <h4>TinyFish Research <span class="status loading">Waiting...</span></h4>
+        <div class="research-result-section" id="${itemId}-groq" style="display: none;">
+          <h4>Groq (Instant) <span class="status loading">Waiting...</span></h4>
           <div class="research-result-content"></div>
         </div>
 
@@ -2159,25 +2158,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       case 'fishing':
         // Show the result sections
-        document.getElementById(`${itemId}-tinyfish`).style.display = 'block';
+        document.getElementById(`${itemId}-groq`).style.display = 'block';
         document.getElementById(`${itemId}-yutori`).style.display = 'block';
         break;
 
-      case 'tinyfish':
-        const tinyfishSection = document.getElementById(`${itemId}-tinyfish`);
-        if (tinyfishSection) {
-          const statusEl = tinyfishSection.querySelector('.status');
-          const contentEl = tinyfishSection.querySelector('.research-result-content');
+      case 'groq':
+        const groqSection = document.getElementById(`${itemId}-groq`);
+        if (groqSection) {
+          const statusEl = groqSection.querySelector('.status');
+          const contentEl = groqSection.querySelector('.research-result-content');
           statusEl.className = `status ${data.result?.success ? 'success' : 'error'}`;
           statusEl.textContent = data.result?.success ? 'Complete' : 'Error';
-          contentEl.innerHTML = formatTinyfishResult(data.result);
+          contentEl.innerHTML = formatGroqResult(data.result);
         }
-        // Mark fishing step as complete when tinyfish completes (since yutori is disabled)
-        const fishingStepTf = document.getElementById(`${itemId}-fishing`);
-        if (fishingStepTf) {
-          fishingStepTf.querySelector('.step-icon').innerHTML = '✓';
-          fishingStepTf.querySelector('.research-step-header').classList.remove('pending');
-          fishingStepTf.classList.add('completed');
+        // Mark fishing step as complete when groq completes (since yutori is disabled)
+        const fishingStepGroq = document.getElementById(`${itemId}-fishing`);
+        if (fishingStepGroq) {
+          fishingStepGroq.querySelector('.step-icon').innerHTML = '✓';
+          fishingStepGroq.querySelector('.research-step-header').classList.remove('pending');
+          fishingStepGroq.classList.add('completed');
         }
         break;
 
@@ -2213,25 +2212,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     return div.innerHTML;
   }
 
-  function formatTinyfishResult(result) {
+  function formatGroqResult(result) {
     if (!result) return '<em>No response</em>';
     if (!result.success) return `<div class="error-message">${escapeHtml(result.error) || 'Unknown error'}</div>`;
 
-    const data = result.result;
-    if (!data) return '<em>Empty response</em>';
+    const content = result.result;
+    if (!content) return '<em>Empty response</em>';
 
-    // Check if it's the AWS agentic AI format
-    if (data.aws_agentic_ai_repositories || data.summary) {
-      return formatAwsAgenticResponse(data);
-    }
-
-    // Try to format as structured data
-    if (typeof data === 'object') {
-      return formatGenericJson(data);
-    }
-
-    // Plain text
-    return `<div class="text-result">${escapeHtml(String(data)).replace(/\n/g, '<br>')}</div>`;
+    // Format as bullet points - the content should already be in bullet format
+    const lines = content.split('\n').filter(line => line.trim());
+    let html = '<ul class="groq-bullets">';
+    lines.forEach(line => {
+      // Remove leading bullet characters if present
+      const cleanLine = line.replace(/^[•\-\*]\s*/, '').trim();
+      if (cleanLine) {
+        html += `<li>${escapeHtml(cleanLine)}</li>`;
+      }
+    });
+    html += '</ul>';
+    return html;
   }
 
   function formatGenericJson(data) {
@@ -2405,29 +2404,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Show loading state on button
-      const originalHTML = researchButton.innerHTML;
-      researchButton.classList.add('loading');
-      researchButton.disabled = true;
+      // Generate unique request ID for this research request
+      const requestId = `research-${++researchRequestCounter}-${Date.now()}`;
 
-      // Open pane and add loading item
+      // Open pane and add loading item (don't disable button - allow concurrent requests)
       openResearchPane();
-      currentResearchItemId = addResearchItem({ loading: true });
+      const itemId = addResearchItem({ loading: true });
+      activeResearchItems.set(requestId, itemId);
 
       try {
-        const result = await window.electronAPI.researchQuestion(currentEditingMeetingId);
+        const result = await window.electronAPI.researchQuestion(currentEditingMeetingId, requestId);
         // Final result handled by progress events, but update if needed
         if (!result.success) {
-          updateResearchProgress(currentResearchItemId, 'error', { error: result.error });
+          updateResearchProgress(itemId, 'error', { error: result.error });
         }
       } catch (error) {
         console.error('Error researching question:', error);
-        updateResearchProgress(currentResearchItemId, 'error', { error: error.message });
+        updateResearchProgress(itemId, 'error', { error: error.message });
       } finally {
-        researchButton.innerHTML = originalHTML;
-        researchButton.classList.remove('loading');
-        researchButton.disabled = false;
-        currentResearchItemId = null;
+        activeResearchItems.delete(requestId);
       }
     });
   }
@@ -2441,8 +2436,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Listen for research progress updates
   window.electronAPI.onResearchProgress((data) => {
     console.log('Research progress:', data);
-    if (currentResearchItemId && data.phase) {
-      updateResearchProgress(currentResearchItemId, data.phase, data);
+    const itemId = data.requestId ? activeResearchItems.get(data.requestId) : null;
+    if (itemId && data.phase) {
+      updateResearchProgress(itemId, data.phase, data);
     }
   });
 
