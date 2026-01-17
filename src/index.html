@@ -25,6 +25,7 @@
           </div>
         </div>
         <div class="header-right">
+          <button class="btn research-btn" id="researchBtn">Lead AutoSearch</button>
           <button class="btn new-note-btn" id="newNoteBtn">Record In-person Meeting</button>
           <button class="btn join-meeting-btn" id="joinMeetingBtn">Record Meeting</button>
           <button id="toggleSidebar" class="btn toggle-sidebar-btn" style="display: none;">
@@ -269,5 +270,95 @@ Chat with meeting transcript: https://notes.granola.ai/d/393a95cf-4788-4a47-9deb
         <path d="M20 8h-2.81c-.45-.78-1.07-1.45-1.82-1.96L17 4.41 15.59 3l-2.17 2.17C12.96 5.06 12.49 5 12 5c-.49 0-.96.06-1.41.17L8.41 3 7 4.41l1.62 1.63C7.88 6.55 7.26 7.22 6.81 8H4v2h2.09c-.05.33-.09.66-.09 1v1H4v2h2v1c0 .34.04.67.09 1H4v2h2.81c1.04 1.79 2.97 3 5.19 3s4.15-1.21 5.19-3H20v-2h-2.09c.05-.33.09-.66.09-1v-1h2v-2h-2v-1c0-.34-.04-.67-.09-1H20V8zm-6 8h-4v-2h4v2zm0-4h-4v-2h4v2z" fill="currentColor"/>
       </svg>
     </button>
+
+    <!-- Research Panel -->
+    <div class="research-panel hidden" id="researchPanel">
+      <div class="research-panel-header">
+        <h3>Lead Autogen</h3>
+        <button class="research-panel-close" id="closeResearchPanelBtn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="currentColor"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="research-panel-content">
+        <div class="research-input-section">
+          <h4>Search Query</h4>
+          <textarea
+            id="researchQuery"
+            class="research-query-input"
+            placeholder="Enter search terms like 'b2g procurement enterprise contract, fundrase news'"
+            rows="3"
+          >b2g procurement enterprise contract, fundraise news</textarea>
+
+          <div class="research-buttons">
+            <button class="btn research-start-btn" id="startResearchBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="currentColor"/>
+              </svg>
+              Start Research
+            </button>
+
+            <button class="btn load-sample-btn" id="loadSampleDataBtn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z" fill="currentColor"/>
+              </svg>
+              Load Sample Data
+            </button>
+          </div>
+        </div>
+
+        <div class="research-status-section" id="researchStatus" style="display: none;">
+          <div class="research-status-message" id="researchStatusMessage">
+            Initializing research...
+          </div>
+          <div class="research-progress-bar">
+            <div class="research-progress-fill" id="researchProgressFill"></div>
+          </div>
+        </div>
+
+        <div class="research-results-section" id="researchResults" style="display: none;">
+          <div class="research-results-header">
+            <h4>Research Results</h4>
+            <button class="btn generate-email-btn" id="generateEmailBtn">Generate Follow-up Email</button>
+          </div>
+          <div class="research-results-content" id="researchResultsContent">
+            <!-- Results will be inserted here -->
+          </div>
+        </div>
+
+        <div class="contacts-preview-section" id="contactsPreview" style="display: none;">
+          <div class="contacts-preview-header">
+            <h4>📧 Email Timeline Preview</h4>
+            <div class="contacts-stats">
+              <span id="contactsCount">0 contacts</span>
+              <span id="emailsCount">0 emails</span>
+              <span id="estimatedTime">Est: 0 min</span>
+            </div>
+          </div>
+          <div class="contacts-list" id="contactsList">
+            <!-- Contact cards will be inserted here -->
+          </div>
+          <button class="btn generate-all-btn" id="generateAllEmailsBtn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="currentColor"/>
+            </svg>
+            Generate All AI Emails
+          </button>
+        </div>
+
+        <div class="email-section" id="emailSection" style="display: none;">
+          <div class="email-header">
+            <h4>Generated Emails</h4>
+            <div class="email-stats">
+              <span id="generationProgress">Generating...</span>
+            </div>
+          </div>
+          <textarea id="emailContent" class="email-content" rows="15"></textarea>
+          <button class="btn copy-email-btn" id="copyEmailBtn">Copy All Emails</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>

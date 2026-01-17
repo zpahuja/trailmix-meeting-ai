@@ -2022,4 +2022,542 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
+  // ===== Research Panel Logic =====
+  const researchBtn = document.getElementById('researchBtn');
+  const researchPanel = document.getElementById('researchPanel');
+  const closeResearchPanelBtn = document.getElementById('closeResearchPanelBtn');
+  const startResearchBtn = document.getElementById('startResearchBtn');
+  const researchQuery = document.getElementById('researchQuery');
+  const researchStatus = document.getElementById('researchStatus');
+  const researchStatusMessage = document.getElementById('researchStatusMessage');
+  const researchResults = document.getElementById('researchResults');
+  const researchResultsContent = document.getElementById('researchResultsContent');
+  const generateEmailBtn = document.getElementById('generateEmailBtn');
+  const emailSection = document.getElementById('emailSection');
+  const emailContent = document.getElementById('emailContent');
+  const copyEmailBtn = document.getElementById('copyEmailBtn');
+
+  let currentResearchResults = [];
+
+  // Toggle research panel
+  researchBtn.addEventListener('click', () => {
+    researchPanel.classList.toggle('hidden');
+  });
+
+  closeResearchPanelBtn.addEventListener('click', () => {
+    researchPanel.classList.add('hidden');
+  });
+
+  // Start research
+  startResearchBtn.addEventListener('click', async () => {
+    const query = researchQuery.value.trim();
+    if (!query) {
+      alert('Please enter a search query');
+      return;
+    }
+
+    // Disable button and show status
+    startResearchBtn.disabled = true;
+    startResearchBtn.textContent = 'Researching...';
+    researchStatus.style.display = 'block';
+    researchResults.style.display = 'none';
+    emailSection.style.display = 'none';
+
+    try {
+      const result = await window.electronAPI.startResearch(query);
+
+      if (result.success) {
+        currentResearchResults = result.results || [];
+        displayResearchResults(currentResearchResults);
+        researchStatus.style.display = 'none';
+        researchResults.style.display = 'block';
+      } else {
+        researchStatusMessage.textContent = `Error: ${result.error}`;
+        setTimeout(() => {
+          researchStatus.style.display = 'none';
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Research error:', error);
+      researchStatusMessage.textContent = `Error: ${error.message}`;
+      setTimeout(() => {
+        researchStatus.style.display = 'none';
+      }, 3000);
+    } finally {
+      startResearchBtn.disabled = false;
+      startResearchBtn.textContent = 'Start Research';
+    }
+  });
+
+  // Load sample data
+  const loadSampleDataBtn = document.getElementById('loadSampleDataBtn');
+  let fullCSVData = null; // Store the full CSV data for email generation
+
+  loadSampleDataBtn.addEventListener('click', async () => {
+    loadSampleDataBtn.disabled = true;
+    loadSampleDataBtn.textContent = 'Loading...';
+    researchStatus.style.display = 'block';
+    researchStatusMessage.textContent = 'Loading sample data from CSV files...';
+    researchResults.style.display = 'none';
+    emailSection.style.display = 'none';
+
+    try {
+      const result = await window.electronAPI.loadSampleData();
+
+      if (result.success) {
+        // Store full CSV data for email generation
+        fullCSVData = result.data;
+
+        // Transform meeting data to match research results format
+        const sampleResults = result.data.meetings.slice(0, 10).map(meeting => {
+          // Find participants for this meeting
+          const meetingParticipants = result.data.participants.filter(
+            p => p.meeting_id === meeting.id
+          );
+
+          // Find follow-ups for this meeting
+          const followup = result.data.followups.find(
+            f => f.meeting_id === meeting.id
+          );
+
+          // Find applicable email template
+          const template = result.data.emailTemplates.find(
+            t => t.template_type === 'followup' && t.is_active === '1'
+          );
+
+          return {
+            title: meeting.meeting_title,
+            description: `${meeting.meeting_type} - ${meeting.notes}`,
+            url: `mailto:${meeting.organizer_email}`,
+            amount: 'Sample Meeting',
+            deadline: meeting.meeting_date,
+            contact_email: meeting.organizer_email,
+            agency: meeting.organizer,
+            naics_code: 'N/A',
+            set_aside: meeting.status,
+            source: 'Sample Database',
+            participants: meetingParticipants.length,
+            hasFollowup: !!followup,
+            // Store complete meeting data for email generation
+            meetingData: {
+              id: meeting.id,
+              title: meeting.meeting_title,
+              type: meeting.meeting_type,
+              date: meeting.meeting_date,
+              time: `${meeting.start_time} - ${meeting.end_time}`,
+              location: meeting.location,
+              organizer: meeting.organizer,
+              organizerEmail: meeting.organizer_email,
+              notes: meeting.notes,
+              status: meeting.status,
+              participants: meetingParticipants,
+              followup: followup,
+              template: template
+            }
+          };
+        });
+
+        currentResearchResults = sampleResults;
+        displayResearchResults(sampleResults);
+        researchStatus.style.display = 'none';
+        researchResults.style.display = 'block';
+
+        // Show contacts preview panel
+        displayContactsPreview(sampleResults, fullCSVData);
+
+        // Show success message
+        researchStatusMessage.textContent = `Loaded ${sampleResults.length} sample meetings from database!`;
+      } else {
+        researchStatusMessage.textContent = `Error loading sample data: ${result.error}`;
+        setTimeout(() => {
+          researchStatus.style.display = 'none';
+        }, 3000);
+      }
+    } catch (error) {
+      console.error('Error loading sample data:', error);
+      researchStatusMessage.textContent = `Error: ${error.message}`;
+      setTimeout(() => {
+        researchStatus.style.display = 'none';
+      }, 3000);
+    } finally {
+      loadSampleDataBtn.disabled = false;
+      loadSampleDataBtn.textContent = 'Load Sample Data';
+    }
+  });
+
+  // Generate AI-powered follow-up emails for all meetings, split by contact
+  async function generateAllFollowupEmails(meetings) {
+    emailSection.style.display = 'block';
+    emailContent.value = 'Generating AI-powered emails for each contact...\n\nThis may take a few minutes...\n';
+
+    let allEmails = '';
+    let totalEmails = 0;
+    let totalContacts = 0;
+
+    for (const meeting of meetings) {
+      const meetingData = meeting.meetingData;
+
+      // Generate emails for each participant
+      for (const participant of meetingData.participants) {
+        totalContacts++;
+
+        emailContent.value = `Generating emails for ${participant.participant_name} (${totalContacts}/${getTotalContactsCount(meetings)})...\n`;
+
+        try {
+          // Generate 6 scheduled emails for this contact using AI
+          const result = await window.electronAPI.generateAIEmailTimeline(meetingData, participant);
+
+          if (result.success) {
+            allEmails += `\n\n${'='.repeat(90)}\n`;
+            allEmails += `CONTACT: ${participant.participant_name} (${participant.participant_email})\n`;
+            allEmails += `MEETING: ${meetingData.title}\n`;
+            allEmails += `ROLE: ${participant.role} | ATTENDANCE: ${participant.attendance_status}\n`;
+            allEmails += `${'='.repeat(90)}\n\n`;
+
+            // Add all scheduled emails for this contact
+            result.timeline.forEach((email) => {
+              totalEmails++;
+              allEmails += `\n--- EMAIL ${email.emailNumber}/6: ${email.label} ---\n`;
+              allEmails += `Scheduled: ${email.scheduledDate} (${email.daysAfterMeeting} days after meeting)\n`;
+              allEmails += `To: ${email.recipient.email}\n`;
+              allEmails += `Type: ${email.type}\n\n`;
+              allEmails += `Subject: ${email.subject}\n\n`;
+              allEmails += `${email.body}\n`;
+              allEmails += `\n${'-'.repeat(90)}\n`;
+            });
+
+            emailContent.value = allEmails;
+          }
+        } catch (error) {
+          console.error('Error generating emails for contact:', error);
+          allEmails += `\nError generating emails for ${participant.participant_name}: ${error.message}\n`;
+        }
+      }
+    }
+
+    allEmails += `\n\n${'='.repeat(90)}\n`;
+    allEmails += `SUMMARY\n`;
+    allEmails += `${'='.repeat(90)}\n`;
+    allEmails += `Total Contacts: ${totalContacts}\n`;
+    allEmails += `Total Emails Generated: ${totalEmails}\n`;
+    allEmails += `Meetings Processed: ${meetings.length}\n`;
+    allEmails += `\nAll emails generated using AI (Claude 3.7 Sonnet)\n`;
+
+    emailContent.value = allEmails;
+  }
+
+  // Helper function to count total contacts
+  function getTotalContactsCount(meetings) {
+    return meetings.reduce((count, meeting) => {
+      return count + (meeting.meetingData.participants?.length || 0);
+    }, 0);
+  }
+
+  // Generate AI emails for a single contact
+  async function generateEmailsForSingleContact(meetingData, participant, contactCard) {
+    const generateBtn = contactCard.querySelector('.generate-single');
+    const statusDiv = contactCard.querySelector('.timeline-status');
+
+    // Disable button and show status
+    generateBtn.disabled = true;
+    generateBtn.textContent = 'Generating...';
+    statusDiv.style.display = 'block';
+    statusDiv.textContent = `🤖 Generating 6 AI emails for ${participant.participant_name}...`;
+
+    // Expand the card to show timeline
+    if (!contactCard.classList.contains('expanded')) {
+      contactCard.classList.add('expanded');
+      const toggleBtn = contactCard.querySelector('.toggle-timeline');
+      toggleBtn.textContent = 'Hide Timeline';
+    }
+
+    try {
+      // Generate 6 scheduled emails for this contact using AI
+      const result = await window.electronAPI.generateAIEmailTimeline(meetingData, participant);
+
+      if (result.success) {
+        // Update status
+        statusDiv.style.display = 'block';
+        statusDiv.style.background = '#e8f5e9';
+        statusDiv.style.color = '#2e7d32';
+        statusDiv.innerHTML = `✅ Generated ${result.timeline.length} emails successfully!<br><br><strong>Preview:</strong>`;
+
+        // Show preview of each email in the timeline
+        result.timeline.forEach((email, idx) => {
+          const timelineItem = contactCard.querySelectorAll('.timeline-item')[idx];
+          if (timelineItem) {
+            timelineItem.innerHTML = `
+              <div class="timeline-header">
+                <span class="timeline-label">${email.emailNumber}. ${email.label}</span>
+                <span class="timeline-date">${email.scheduledDate}</span>
+              </div>
+              <div class="timeline-type">${email.type}</div>
+              <div style="font-size: 11px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #e0e0e0;">
+                <strong>Subject:</strong> ${email.subject}<br>
+                <strong>Preview:</strong> ${email.body.substring(0, 100)}...
+              </div>
+            `;
+          }
+        });
+
+        // Update email section with this contact's emails
+        const emailSection = document.getElementById('emailSection');
+        const emailContent = document.getElementById('emailContent');
+
+        emailSection.style.display = 'block';
+
+        let emailText = `\n${'='.repeat(90)}\n`;
+        emailText += `CONTACT: ${participant.participant_name} (${participant.participant_email})\n`;
+        emailText += `MEETING: ${meetingData.title}\n`;
+        emailText += `ROLE: ${participant.role} | ATTENDANCE: ${participant.attendance_status}\n`;
+        emailText += `${'='.repeat(90)}\n\n`;
+
+        result.timeline.forEach((email) => {
+          emailText += `\n--- EMAIL ${email.emailNumber}/6: ${email.label} ---\n`;
+          emailText += `Scheduled: ${email.scheduledDate} (${email.daysAfterMeeting} days after meeting)\n`;
+          emailText += `To: ${email.recipient.email}\n`;
+          emailText += `Type: ${email.type}\n\n`;
+          emailText += `Subject: ${email.subject}\n\n`;
+          emailText += `${email.body}\n`;
+          emailText += `\n${'-'.repeat(90)}\n`;
+        });
+
+        // Append to existing content or replace
+        emailContent.value = emailText + '\n\n' + emailContent.value;
+
+        // Re-enable button with different text
+        generateBtn.textContent = '✓ Generated';
+        generateBtn.style.background = '#4caf50';
+      } else {
+        throw new Error(result.error || 'Unknown error');
+      }
+    } catch (error) {
+      console.error('Error generating emails for contact:', error);
+      statusDiv.style.background = '#ffebee';
+      statusDiv.style.color = '#c62828';
+      statusDiv.textContent = `❌ Error: ${error.message}`;
+      generateBtn.disabled = false;
+      generateBtn.textContent = 'Retry';
+    }
+  }
+
+  // Display contacts preview panel with email timeline
+  function displayContactsPreview(meetings, csvData) {
+    const contactsPreview = document.getElementById('contactsPreview');
+    const contactsList = document.getElementById('contactsList');
+    const contactsCount = document.getElementById('contactsCount');
+    const emailsCount = document.getElementById('emailsCount');
+    const estimatedTime = document.getElementById('estimatedTime');
+
+    contactsPreview.style.display = 'block';
+    contactsList.innerHTML = '';
+
+    // Calculate statistics
+    const totalContacts = getTotalContactsCount(meetings);
+    const totalEmails = totalContacts * 6; // 6 emails per contact
+    const estimatedMinutes = Math.ceil(totalContacts * 0.5); // ~30 seconds per contact
+
+    contactsCount.textContent = `${totalContacts} contacts`;
+    emailsCount.textContent = `${totalEmails} emails to generate`;
+    estimatedTime.textContent = `Est: ${estimatedMinutes} min`;
+
+    // Create contact cards for each participant
+    meetings.forEach((meeting) => {
+      const meetingData = meeting.meetingData;
+
+      meetingData.participants.forEach((participant) => {
+        const contactCard = document.createElement('div');
+        contactCard.className = 'contact-card';
+        contactCard.dataset.participantEmail = participant.participant_email;
+        contactCard.dataset.meetingId = meetingData.id;
+
+        // Email schedule preview (6 emails)
+        const scheduleTypes = [
+          { type: 'followup', days: 0, label: 'Immediate Follow-up' },
+          { type: 'action_items', days: 2, label: '2-Day Check-in' },
+          { type: 'status_update', days: 7, label: '1-Week Update' },
+          { type: 'reminder', days: 12, label: 'Deadline Reminder' },
+          { type: 'summary', days: 14, label: '2-Week Summary' },
+          { type: 'followup', days: 21, label: '3-Week Follow-up' }
+        ];
+
+        const meetingDate = new Date(meetingData.date);
+        const timelineHTML = scheduleTypes.map((schedule, idx) => {
+          const scheduledDate = new Date(meetingDate);
+          scheduledDate.setDate(scheduledDate.getDate() + schedule.days);
+          const dateStr = scheduledDate.toISOString().split('T')[0];
+
+          return `
+            <div class="timeline-item">
+              <div class="timeline-header">
+                <span class="timeline-label">${idx + 1}. ${schedule.label}</span>
+                <span class="timeline-date">${dateStr}</span>
+              </div>
+              <div class="timeline-type">${schedule.type}</div>
+            </div>
+          `;
+        }).join('');
+
+        contactCard.innerHTML = `
+          <div class="contact-header">
+            <div class="contact-info">
+              <div class="contact-name">${participant.participant_name}</div>
+              <div class="contact-meta">
+                <span>📧 ${participant.participant_email}</span>
+                <span>👤 ${participant.role}</span>
+                <span>📅 ${participant.attendance_status}</span>
+                <span>🎯 ${meetingData.title}</span>
+              </div>
+            </div>
+            <div class="contact-actions">
+              <button class="btn-small toggle-timeline">View Timeline</button>
+              <button class="btn-small generate-single" data-contact-email="${participant.participant_email}">Generate AI Emails</button>
+            </div>
+          </div>
+          <div class="email-timeline">
+            <h5 style="font-size: 13px; margin: 0 0 8px 0; color: #666;">6 Scheduled Emails:</h5>
+            ${timelineHTML}
+            <div class="timeline-status" style="display: none; margin-top: 12px; padding: 8px; background: #f0f0f0; border-radius: 4px; font-size: 12px;"></div>
+          </div>
+        `;
+
+        // Toggle timeline expansion
+        const toggleBtn = contactCard.querySelector('.toggle-timeline');
+        toggleBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          contactCard.classList.toggle('expanded');
+          toggleBtn.textContent = contactCard.classList.contains('expanded') ? 'Hide Timeline' : 'View Timeline';
+        });
+
+        // Generate emails for single contact
+        const generateSingleBtn = contactCard.querySelector('.generate-single');
+        generateSingleBtn.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          await generateEmailsForSingleContact(meetingData, participant, contactCard);
+        });
+
+        contactsList.appendChild(contactCard);
+      });
+    });
+
+    // Set up "Generate All" button
+    const generateAllBtn = document.getElementById('generateAllEmailsBtn');
+    generateAllBtn.onclick = () => generateAllFollowupEmails(meetings);
+  }
+
+  // Listen for research progress updates
+  window.electronAPI.onResearchProgress((data) => {
+    console.log('Research progress:', data);
+    researchStatusMessage.textContent = data.message;
+  });
+
+  // Display research results
+  function displayResearchResults(results) {
+    researchResultsContent.innerHTML = '';
+
+    if (!results || results.length === 0) {
+      researchResultsContent.innerHTML = '<p style="color: #999; text-align: center; padding: 20px;">No results found</p>';
+      return;
+    }
+
+    results.forEach(result => {
+      const resultItem = document.createElement('div');
+      resultItem.className = 'research-result-item';
+
+      const title = document.createElement('div');
+      title.className = 'research-result-title';
+      title.textContent = result.title || 'Untitled';
+      resultItem.appendChild(title);
+
+      if (result.description) {
+        const description = document.createElement('div');
+        description.className = 'research-result-description';
+        description.textContent = result.description;
+        resultItem.appendChild(description);
+      }
+
+      const meta = document.createElement('div');
+      meta.className = 'research-result-meta';
+
+      if (result.amount || result.contract_value) {
+        const value = document.createElement('span');
+        value.textContent = `Value: ${result.amount || result.contract_value}`;
+        meta.appendChild(value);
+      }
+
+      if (result.deadline) {
+        const deadline = document.createElement('span');
+        deadline.textContent = `Deadline: ${result.deadline}`;
+        meta.appendChild(deadline);
+      }
+
+      if (meta.children.length > 0) {
+        resultItem.appendChild(meta);
+      }
+
+      if (result.url) {
+        const link = document.createElement('a');
+        link.className = 'research-result-link';
+        link.href = result.url;
+        link.textContent = 'Read more →';
+        link.target = '_blank';
+        resultItem.appendChild(link);
+      }
+
+      researchResultsContent.appendChild(resultItem);
+    });
+  }
+
+  // Generate follow-up email
+  generateEmailBtn.addEventListener('click', async () => {
+    if (currentResearchResults.length === 0) {
+      alert('No research results to generate email from');
+      return;
+    }
+
+    const recipientName = document.getElementById('recipientName').value || 'there';
+    const senderName = document.getElementById('senderName').value || '';
+    const companyName = document.getElementById('companyName').value || '';
+
+    try {
+      const result = await window.electronAPI.generateFollowUpEmail(
+        currentResearchResults,
+        {
+          recipientName,
+          senderName,
+          companyName,
+          includeCallToAction: true
+        }
+      );
+
+      if (result.success) {
+        emailContent.value = result.email;
+        emailSection.style.display = 'block';
+        // Scroll to email section
+        emailSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        alert(`Error generating email: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('Error generating email:', error);
+      alert(`Error: ${error.message}`);
+    }
+  });
+
+  // Copy email to clipboard
+  copyEmailBtn.addEventListener('click', () => {
+    emailContent.select();
+    document.execCommand('copy');
+
+    // Visual feedback
+    const originalText = copyEmailBtn.textContent;
+    copyEmailBtn.textContent = '✓ Copied!';
+    copyEmailBtn.style.backgroundColor = '#45a049';
+
+    setTimeout(() => {
+      copyEmailBtn.textContent = originalText;
+      copyEmailBtn.style.backgroundColor = '';
+    }, 2000);
+  });
+
 });

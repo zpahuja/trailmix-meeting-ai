@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yutori API Demo - B2G Procurement Research</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 900px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-section {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #e0e0e0;
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .status-section {
+            background: #f9f9f9;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: none;
+        }
+
+        .status-section.show {
+            display: block;
+        }
+
+        .status-message {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s;
+            animation: progress 2s infinite;
+        }
+
+        @keyframes progress {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .results-section {
+            display: none;
+        }
+
+        .results-section.show {
+            display: block;
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .results-header h2 {
+            color: #333;
+            font-size: 20px;
+        }
+
+        .result-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .results-grid {
+            display: grid;
+            gap: 16px;
+        }
+
+        .result-card {
+            background: #f9f9f9;
+            border-left: 4px solid #667eea;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .result-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .result-description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .result-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 12px;
+            color: #999;
+            margin-bottom: 12px;
+        }
+
+        .result-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .result-link:hover {
+            text-decoration: underline;
+        }
+
+        .email-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .email-section.show {
+            display: block;
+        }
+
+        .email-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .email-content {
+            width: 100%;
+            min-height: 300px;
+            padding: 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.8;
+            margin-bottom: 12px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fee;
+            border-left: 4px solid #f44;
+            color: #c33;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .success {
+            background: #efe;
+            border-left: 4px solid #4c4;
+            color: #363;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .raw-json {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.6;
+        }
+
+        .raw-json pre {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Yutori API Demo</h1>
+        <p class="subtitle">B2G Procurement & Fundraise Research</p>
+
+        <div id="errorMessage"></div>
+        <div id="successMessage"></div>
+
+        <div class="input-section">
+            <label for="apiKey">Yutori API Key</label>
+            <input type="text" id="apiKey" placeholder="yt_..." value="yt_OBX6WEG1djjjqJb8VD_8lAem5vASpj-_dP27Y7TMr64">
+        </div>
+
+        <div class="input-section">
+            <label for="searchQuery">Search Query</label>
+            <textarea id="searchQuery" placeholder="Enter your research query...">b2g procurement enterprise contract, fundraise news</textarea>
+        </div>
+
+        <div class="button-group">
+            <button class="btn-primary" id="startResearchBtn">
+                <span>🚀 Start Research</span>
+            </button>
+            <button class="btn-secondary" id="clearBtn">
+                <span>🗑️ Clear</span>
+            </button>
+        </div>
+
+        <div class="status-section" id="statusSection">
+            <div class="status-message" id="statusMessage">Initializing research...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+        </div>
+
+        <div class="results-section" id="resultsSection">
+            <div class="results-header">
+                <h2>Research Results</h2>
+                <span class="result-count" id="resultCount">0 results</span>
+            </div>
+            <div class="results-grid" id="resultsGrid"></div>
+
+            <div class="button-group" style="margin-top: 20px;">
+                <button class="btn-primary" id="generateEmailBtn">
+                    <span>📧 Generate Follow-up Email</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="email-section" id="emailSection">
+            <h2 style="margin-bottom: 16px; color: #333;">Follow-up Email</h2>
+            <div class="email-options">
+                <input type="text" id="recipientName" placeholder="Recipient name" value="John">
+                <input type="text" id="senderName" placeholder="Your name" value="Jane Smith">
+                <input type="text" id="companyName" placeholder="Company name" value="Acme Corp">
+            </div>
+            <textarea class="email-content" id="emailContent" readonly></textarea>
+            <button class="btn-primary" id="copyEmailBtn">
+                <span>📋 Copy Email</span>
+            </button>
+        </div>
+
+        <div id="rawJsonSection"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://api.yutori.com';
+
+        let currentScoutId = null;
+        let currentResults = [];
+
+        const elements = {
+            apiKey: document.getElementById('apiKey'),
+            searchQuery: document.getElementById('searchQuery'),
+            startResearchBtn: document.getElementById('startResearchBtn'),
+            clearBtn: document.getElementById('clearBtn'),
+            statusSection: document.getElementById('statusSection'),
+            statusMessage: document.getElementById('statusMessage'),
+            progressFill: document.getElementById('progressFill'),
+            resultsSection: document.getElementById('resultsSection'),
+            resultsGrid: document.getElementById('resultsGrid'),
+            resultCount: document.getElementById('resultCount'),
+            generateEmailBtn: document.getElementById('generateEmailBtn'),
+            emailSection: document.getElementById('emailSection'),
+            emailContent: document.getElementById('emailContent'),
+            copyEmailBtn: document.getElementById('copyEmailBtn'),
+            recipientName: document.getElementById('recipientName'),
+            senderName: document.getElementById('senderName'),
+            companyName: document.getElementById('companyName'),
+            errorMessage: document.getElementById('errorMessage'),
+            successMessage: document.getElementById('successMessage'),
+            rawJsonSection: document.getElementById('rawJsonSection')
+        };
+
+        // Create scout
+        async function createScout(apiKey, query) {
+            const response = await fetch(`${API_BASE}/scouts`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: query,
+                    filters: {
+                        categories: ['procurement', 'contracts', 'funding', 'fundraising']
+                    }
+                })
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        }
+
+        // Get scout details
+        async function getScoutDetails(apiKey, scoutId) {
+            const response = await fetch(`${API_BASE}/scouts/${scoutId}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`
+                }
+            });
+
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.message || `HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            return await response.json();
+        }
+
+        // Poll for results
+        async function pollScoutResults(apiKey, scoutId, maxAttempts = 30, intervalMs = 2000) {
+            for (let i = 0; i < maxAttempts; i++) {
+                updateStatus(`Polling for results... (${i + 1}/${maxAttempts})`);
+
+                const details = await getScoutDetails(apiKey, scoutId);
+
+                if (details.status === 'completed') {
+                    return details;
+                }
+
+                if (details.status === 'failed') {
+                    throw new Error('Scout research failed');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, intervalMs));
+            }
+
+            throw new Error('Research timed out after 60 seconds');
+        }
+
+        // Update status message
+        function updateStatus(message) {
+            elements.statusMessage.textContent = message;
+        }
+
+        // Show error
+        function showError(message) {
+            elements.errorMessage.innerHTML = `<div class="error">❌ Error: ${message}</div>`;
+            setTimeout(() => {
+                elements.errorMessage.innerHTML = '';
+            }, 5000);
+        }
+
+        // Show success
+        function showSuccess(message) {
+            elements.successMessage.innerHTML = `<div class="success">✅ ${message}</div>`;
+            setTimeout(() => {
+                elements.successMessage.innerHTML = '';
+            }, 3000);
+        }
+
+        // Display results
+        function displayResults(results) {
+            elements.resultsGrid.innerHTML = '';
+
+            if (!results || results.length === 0) {
+                elements.resultsGrid.innerHTML = '<p style="color: #999; text-align: center; padding: 40px;">No results found</p>';
+                elements.resultCount.textContent = '0 results';
+                return;
+            }
+
+            elements.resultCount.textContent = `${results.length} result${results.length !== 1 ? 's' : ''}`;
+
+            results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+
+                card.innerHTML = `
+                    <div class="result-title">${result.title || 'Untitled Opportunity'}</div>
+                    ${result.description ? `<div class="result-description">${result.description}</div>` : ''}
+                    <div class="result-meta">
+                        ${result.amount || result.contract_value ? `<span>💰 ${result.amount || result.contract_value}</span>` : ''}
+                        ${result.deadline ? `<span>📅 ${result.deadline}</span>` : ''}
+                    </div>
+                    ${result.url ? `<a href="${result.url}" target="_blank" class="result-link">Read more →</a>` : ''}
+                `;
+
+                elements.resultsGrid.appendChild(card);
+            });
+        }
+
+        // Generate email
+        function generateEmail(results, options) {
+            const { recipientName = 'there', senderName = '', companyName = '' } = options;
+
+            if (!results || results.length === 0) {
+                return 'No results available to generate email.';
+            }
+
+            let email = `Hi ${recipientName},\n\n`;
+            email += `I hope this message finds you well. `;
+            email += `I wanted to share some interesting insights I've gathered regarding B2G procurement opportunities and recent fundraising news`;
+            if (companyName) {
+                email += ` that may be relevant to ${companyName}`;
+            }
+            email += `.\n\n`;
+            email += `Key Findings:\n\n`;
+
+            results.slice(0, 5).forEach((result, index) => {
+                email += `${index + 1}. ${result.title || 'Opportunity'}\n`;
+                if (result.description) {
+                    const desc = result.description.substring(0, 200);
+                    email += `   ${desc}${result.description.length > 200 ? '...' : ''}\n`;
+                }
+                if (result.url) {
+                    email += `   Link: ${result.url}\n`;
+                }
+                if (result.amount || result.contract_value) {
+                    email += `   Value: ${result.amount || result.contract_value}\n`;
+                }
+                if (result.deadline) {
+                    email += `   Deadline: ${result.deadline}\n`;
+                }
+                email += `\n`;
+            });
+
+            email += `I believe these opportunities align well with your strategic goals. `;
+            email += `Would you be available for a brief call this week to discuss how we might approach these opportunities together?\n\n`;
+            email += `Looking forward to hearing from you.\n\n`;
+            email += `Best regards`;
+            if (senderName) {
+                email += `,\n${senderName}`;
+            }
+
+            return email;
+        }
+
+        // Display raw JSON
+        function displayRawJson(data, title) {
+            const jsonHtml = `
+                <div class="raw-json">
+                    <strong>${title}</strong>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                </div>
+            `;
+            elements.rawJsonSection.innerHTML += jsonHtml;
+        }
+
+        // Start research button
+        elements.startResearchBtn.addEventListener('click', async () => {
+            const apiKey = elements.apiKey.value.trim();
+            const query = elements.searchQuery.value.trim();
+
+            if (!apiKey) {
+                showError('Please enter your Yutori API key');
+                return;
+            }
+
+            if (!query) {
+                showError('Please enter a search query');
+                return;
+            }
+
+            // Reset UI
+            elements.startResearchBtn.disabled = true;
+            elements.startResearchBtn.innerHTML = '<div class="spinner"></div><span>Researching...</span>';
+            elements.statusSection.classList.add('show');
+            elements.resultsSection.classList.remove('show');
+            elements.emailSection.classList.remove('show');
+            elements.rawJsonSection.innerHTML = '';
+
+            try {
+                // Step 1: Create scout
+                updateStatus('Creating research scout...');
+                const scoutData = await createScout(apiKey, query);
+                currentScoutId = scoutData.scout_id;
+                displayRawJson(scoutData, '1️⃣ Create Scout Response');
+                showSuccess(`Scout created with ID: ${currentScoutId}`);
+
+                // Step 2: Poll for results
+                updateStatus('Researching... This may take up to 60 seconds.');
+                const results = await pollScoutResults(apiKey, currentScoutId);
+                displayRawJson(results, '2️⃣ Scout Details Response');
+
+                currentResults = results.results || [];
+
+                // Display results
+                elements.statusSection.classList.remove('show');
+                elements.resultsSection.classList.add('show');
+                displayResults(currentResults);
+
+                showSuccess(`Research completed! Found ${currentResults.length} results.`);
+
+            } catch (error) {
+                console.error('Research error:', error);
+                showError(error.message);
+                elements.statusSection.classList.remove('show');
+            } finally {
+                elements.startResearchBtn.disabled = false;
+                elements.startResearchBtn.innerHTML = '<span>🚀 Start Research</span>';
+            }
+        });
+
+        // Generate email button
+        elements.generateEmailBtn.addEventListener('click', () => {
+            if (currentResults.length === 0) {
+                showError('No research results available');
+                return;
+            }
+
+            const email = generateEmail(currentResults, {
+                recipientName: elements.recipientName.value || 'there',
+                senderName: elements.senderName.value || '',
+                companyName: elements.companyName.value || ''
+            });
+
+            elements.emailContent.value = email;
+            elements.emailSection.classList.add('show');
+            elements.emailSection.scrollIntoView({ behavior: 'smooth' });
+            showSuccess('Email generated successfully!');
+        });
+
+        // Copy email button
+        elements.copyEmailBtn.addEventListener('click', () => {
+            elements.emailContent.select();
+            document.execCommand('copy');
+
+            elements.copyEmailBtn.innerHTML = '<span>✅ Copied!</span>';
+            setTimeout(() => {
+                elements.copyEmailBtn.innerHTML = '<span>📋 Copy Email</span>';
+            }, 2000);
+
+            showSuccess('Email copied to clipboard!');
+        });
+
+        // Clear button
+        elements.clearBtn.addEventListener('click', () => {
+            elements.resultsSection.classList.remove('show');
+            elements.emailSection.classList.remove('show');
+            elements.statusSection.classList.remove('show');
+            elements.rawJsonSection.innerHTML = '';
+            currentResults = [];
+            currentScoutId = null;
+        });
+    </script>
+</body>
+</html>

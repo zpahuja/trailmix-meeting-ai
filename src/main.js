@@ -6,6 +6,7 @@ const RecallAiSdk = require('@recallai/desktop-sdk');
 const axios = require('axios');
 const OpenAI = require('openai');
 const sdkLogger = require('./sdk-logger');
+const researchService = require('./research-service');
 require('dotenv').config();
 
 // Function to get the OpenRouter headers
@@ -1809,6 +1810,110 @@ ipcMain.handle('checkForDetectedMeeting', async () => {
 // Function to join the detected meeting
 ipcMain.handle('joinDetectedMeeting', async () => {
   return joinDetectedMeeting();
+});
+
+// Research functionality IPC handlers
+ipcMain.handle('startResearch', async (event, query) => {
+  try {
+    const result = await researchService.researchQuery(query, (progress) => {
+      // Send progress updates to renderer
+      if (mainWindow && !mainWindow.isDestroyed()) {
+        mainWindow.webContents.send('research-progress', progress);
+      }
+    });
+
+    return result;
+  } catch (error) {
+    console.error('Error during research:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+ipcMain.handle('generateFollowUpEmail', async (event, { results, options }) => {
+  try {
+    const email = researchService.generateFollowUpEmail(results, options);
+    return {
+      success: true,
+      email
+    };
+  } catch (error) {
+    console.error('Error generating follow-up email:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// Generate AI-powered email timeline for contacts
+ipcMain.handle('generateAIEmailTimeline', async (event, { meetingData, contact }) => {
+  try {
+    const timeline = await researchService.generateEmailTimeline(meetingData, contact);
+    return {
+      success: true,
+      timeline
+    };
+  } catch (error) {
+    console.error('Error generating AI email timeline:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
+});
+
+// Load sample data from CSV files
+ipcMain.handle('loadSampleData', async () => {
+  try {
+    // Get the app root directory (where package.json is)
+    const appRoot = app.getAppPath();
+    const dataDir = path.join(appRoot, 'databyfabricate');
+
+    // Helper function to parse CSV
+    const parseCSV = (content) => {
+      const lines = content.trim().split('\n');
+      const headers = lines[0].split(',');
+      return lines.slice(1).map(line => {
+        const values = line.split(',');
+        const obj = {};
+        headers.forEach((header, index) => {
+          obj[header] = values[index] || '';
+        });
+        return obj;
+      });
+    };
+
+    // Read all CSV files
+    const meetingLogs = fs.readFileSync(path.join(dataDir, 'meeting_logs.csv'), 'utf-8');
+    const participants = fs.readFileSync(path.join(dataDir, 'meeting_participants.csv'), 'utf-8');
+    const emailTemplates = fs.readFileSync(path.join(dataDir, 'scheduled_email_templates.csv'), 'utf-8');
+    const followups = fs.readFileSync(path.join(dataDir, 'followups.csv'), 'utf-8');
+
+    // Parse CSV data
+    const meetings = parseCSV(meetingLogs);
+    const participantsList = parseCSV(participants);
+    const templates = parseCSV(emailTemplates);
+    const followupsList = parseCSV(followups);
+
+    return {
+      success: true,
+      data: {
+        meetings,
+        participants: participantsList,
+        emailTemplates: templates,
+        followups: followupsList
+      }
+    };
+  } catch (error) {
+    console.error('Error loading sample data:', error);
+    return {
+      success: false,
+      error: error.message
+    };
+  }
 });
 
 // Function to handle joining a detected meeting

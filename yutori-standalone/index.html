@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yutori API Test - B2G Procurement Research</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Yutori API Test Suite</h1>
+            <p class="subtitle">B2G Procurement & Fundraise Research Demo</p>
+        </header>
+
+        <div id="alertContainer"></div>
+
+        <section class="config-section">
+            <h2>⚙️ Configuration</h2>
+            <div class="input-group">
+                <label for="apiKey">Yutori API Key</label>
+                <input
+                    type="text"
+                    id="apiKey"
+                    placeholder="yt_..."
+                    value="yt_OBX6WEG1djjjqJb8VD_8lAem5vASpj-_dP27Y7TMr64"
+                >
+            </div>
+
+            <div class="input-group">
+                <label for="searchQuery">Search Query</label>
+                <textarea
+                    id="searchQuery"
+                    rows="3"
+                    placeholder="Enter your research query..."
+                >b2g procurement enterprise contract, fundraise news</textarea>
+            </div>
+
+            <div class="button-row">
+                <button class="btn btn-primary" id="startResearchBtn">
+                    <span class="icon">🚀</span>
+                    <span>Start Research</span>
+                </button>
+                <button class="btn btn-secondary" id="clearBtn">
+                    <span class="icon">🗑️</span>
+                    <span>Clear Results</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="status-section hidden" id="statusSection">
+            <div class="status-header">
+                <h3>⏳ Research Status</h3>
+                <span class="status-badge" id="statusBadge">Pending</span>
+            </div>
+            <div class="status-message" id="statusMessage">Initializing...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="status-meta" id="statusMeta"></div>
+        </section>
+
+        <section class="results-section hidden" id="resultsSection">
+            <div class="results-header">
+                <h2>📊 Research Results</h2>
+                <span class="result-count" id="resultCount">0 results</span>
+            </div>
+            <div class="results-grid" id="resultsGrid"></div>
+
+            <div class="button-row" style="margin-top: 24px;">
+                <button class="btn btn-primary" id="generateEmailBtn">
+                    <span class="icon">📧</span>
+                    <span>Generate Follow-up Email</span>
+                </button>
+            </div>
+        </section>
+
+        <section class="email-section hidden" id="emailSection">
+            <h2>📧 Follow-up Email</h2>
+
+            <div class="email-config">
+                <div class="input-group-inline">
+                    <input type="text" id="recipientName" placeholder="Recipient name" value="John">
+                </div>
+                <div class="input-group-inline">
+                    <input type="text" id="senderName" placeholder="Your name" value="Jane Smith">
+                </div>
+                <div class="input-group-inline">
+                    <input type="text" id="companyName" placeholder="Company name" value="Acme Corp">
+                </div>
+            </div>
+
+            <textarea class="email-preview" id="emailContent" readonly></textarea>
+
+            <button class="btn btn-success" id="copyEmailBtn">
+                <span class="icon">📋</span>
+                <span>Copy to Clipboard</span>
+            </button>
+        </section>
+
+        <section class="debug-section" id="debugSection">
+            <div class="debug-header">
+                <h2>🐛 API Response Debug</h2>
+                <button class="btn-text" id="toggleDebugBtn">Show/Hide</button>
+            </div>
+            <div class="debug-content hidden" id="debugContent">
+                <div id="debugLog"></div>
+            </div>
+        </section>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

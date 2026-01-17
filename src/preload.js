@@ -34,5 +34,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onVideoFrame: (callback) => ipcRenderer.on('video-frame', (_, data) => callback(data)),
   onMeetingDetectionStatus: (callback) => ipcRenderer.on('meeting-detection-status', (_, data) => callback(data)),
   onMeetingTitleUpdated: (callback) => ipcRenderer.on('meeting-title-updated', (_, data) => callback(data)),
-  getActiveRecordingId: (noteId) => ipcRenderer.invoke('getActiveRecordingId', noteId)
+  getActiveRecordingId: (noteId) => ipcRenderer.invoke('getActiveRecordingId', noteId),
+  // Research functionality
+  startResearch: (query) => ipcRenderer.invoke('startResearch', query),
+  generateFollowUpEmail: (results, options) => ipcRenderer.invoke('generateFollowUpEmail', { results, options }),
+  onResearchProgress: (callback) => ipcRenderer.on('research-progress', (_, data) => callback(data)),
+  loadSampleData: () => ipcRenderer.invoke('loadSampleData'),
+  generateAIEmailTimeline: (meetingData, contact) => ipcRenderer.invoke('generateAIEmailTimeline', { meetingData, contact })
 });
