@@ -1119,8 +1119,14 @@ ipcMain.handle('generateMeetingSummaryStreaming', async (event, meetingId) => {
   }
 });
 
-// Handle research question extraction and API calls
+// Handle research question extraction and API calls (non-blocking with progress updates)
 ipcMain.handle('researchQuestion', async (event, meetingId) => {
+  const sendProgress = (phase, data) => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.webContents.send('research-progress', { meetingId, phase, ...data });
+    }
+  };
+
   try {
     console.log(`Research question requested for meeting: ${meetingId}`);
 
@@ -1141,58 +1147,80 @@ ipcMain.handle('researchQuestion', async (event, meetingId) => {
     console.log(`Found meeting with ${meeting.transcript.length} transcript entries`);
 
     // Step 1: Generate meeting context summary
+    sendProgress('summarizing', { status: 'in_progress' });
     console.log('Generating meeting context summary...');
     const contextSummary = await generateMeetingContext(meeting.transcript);
     console.log('Context summary:', contextSummary);
+    sendProgress('summarizing', { status: 'complete', contextSummary });
 
     // Step 2: Extract recent transcript (last 30 seconds)
     const recentTranscript = extractRecentTranscript(meeting.transcript, 30);
     console.log(`Extracted ${recentTranscript.length} recent transcript entries`);
 
     // Step 3: Synthesize research question
+    sendProgress('synthesizing', { status: 'in_progress' });
     console.log('Synthesizing research question...');
     const question = await synthesizeResearchQuestion(contextSummary, recentTranscript);
 
     if (!question) {
+      sendProgress('synthesizing', { status: 'error', error: 'Could not synthesize question' });
       return { success: false, error: 'Could not synthesize a research question from the transcript' };
     }
 
     console.log('Synthesized question:', question);
+    sendProgress('synthesizing', { status: 'complete', question });
 
-    // Send progress update to renderer
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.webContents.send('research-progress', {
-        meetingId,
-        phase: 'researching',
-        question
-      });
-    }
+    // Step 4: Start fishing (query APIs)
+    sendProgress('fishing', { status: 'in_progress' });
+    console.log('Querying Tinyfish and Yutori APIs...');
 
-    // Step 4: Query both APIs in parallel
-    console.log('Querying Yutori and Tinyfish APIs in parallel...');
-    const [yutoriResult, tinyfishResult] = await Promise.allSettled([
-      queryYutori(question),
-      queryTinyfish(question)
-    ]);
+    // Query Tinyfish first (usually faster), send update when done
+    const tinyfishPromise = queryTinyfish(question).then(result => {
+      console.log('Tinyfish completed');
+      sendProgress('tinyfish', { status: result.success ? 'complete' : 'error', result });
+      return result;
+    }).catch(error => {
+      const result = { success: false, error: error.message };
+      sendProgress('tinyfish', { status: 'error', result });
+      return result;
+    });
+
+    // Yutori disabled - was freezing the pipeline
+    // const yutoriPromise = queryYutori(question).then(result => {
+    //   console.log('Yutori completed');
+    //   sendProgress('yutori', { status: result.success ? 'complete' : 'error', result });
+    //   return result;
+    // }).catch(error => {
+    //   const result = { success: false, error: error.message };
+    //   sendProgress('yutori', { status: 'error', result });
+    //   return result;
+    // });
+
+    // Wait for Tinyfish to complete (Yutori disabled)
+    const tinyfishResult = await tinyfishPromise;
+    const yutoriResult = { success: false, error: 'Yutori temporarily disabled' };
+    sendProgress('yutori', { status: 'disabled', result: yutoriResult });
+
+    sendProgress('complete', {});
 
     const result = {
       success: true,
       question,
       contextSummary,
       recentTranscript: recentTranscript.map(e => `${e.speaker}: ${e.text}`).join('\n'),
-      yutori: yutoriResult.status === 'fulfilled' ? yutoriResult.value : { success: false, error: yutoriResult.reason?.message || 'Unknown error' },
-      tinyfish: tinyfishResult.status === 'fulfilled' ? tinyfishResult.value : { success: false, error: tinyfishResult.reason?.message || 'Unknown error' }
+      tinyfish: tinyfishResult,
+      yutori: yutoriResult
     };
 
     console.log('Research completed:', {
       question: result.question,
-      yutoriSuccess: result.yutori.success,
       tinyfishSuccess: result.tinyfish.success
     });
 
     return result;
   } catch (error) {
     console.error('Error in researchQuestion:', error);
+    sendProgress('error', { error: error.message });
     return { success: false, error: error.message };
   }
 });
@@ -1937,7 +1965,7 @@ async function queryTinyfish(question) {
           'X-API-Key': TINYFISH_API_KEY,
           'Content-Type': 'application/json'
         },
-        timeout: 60000 // 60 second timeout
+        timeout: 300000 // 5 minute timeout
       }
     );
 

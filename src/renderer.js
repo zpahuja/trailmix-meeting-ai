@@ -2027,6 +2027,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // ============== Research Question Feature ==============
 
+  // Track current research item for progress updates
+  let currentResearchItemId = null;
+
   // Research pane functions
   function openResearchPane() {
     const pane = document.getElementById('researchPane');
@@ -2056,55 +2059,151 @@ document.addEventListener('DOMContentLoaded', async () => {
       item.classList.add('collapsed');
     });
 
-    // Create new expanded item
+    // Create new expanded item with progressive sections
     const item = document.createElement('div');
     item.id = itemId;
     item.className = 'research-item expanded';
-    item.innerHTML = loading ? `
-      <div class="research-item-header">
-        <span class="research-item-question">Analyzing transcript...</span>
+    item.innerHTML = `
+      <div class="research-item-header" onclick="window.toggleResearchItem('${itemId}')">
+        <span class="research-item-question">GoFish - Realtime Question Answering</span>
         <span class="research-item-toggle">▼</span>
       </div>
       <div class="research-item-body">
-        <div class="research-loading"><div class="spinner"></div>Synthesizing question...</div>
+        <div class="research-step" id="${itemId}-summary">
+          <div class="research-step-header">
+            <span class="step-icon"><div class="spinner"></div></span>
+            <span class="step-label">Summarizing previous context...</span>
+          </div>
+          <div class="research-step-content" style="display: none;"></div>
+        </div>
+
+        <div class="research-step" id="${itemId}-question">
+          <div class="research-step-header pending">
+            <span class="step-icon">○</span>
+            <span class="step-label">Synthesizing question...</span>
+          </div>
+          <div class="research-step-content" style="display: none;"></div>
+        </div>
+
+        <div class="research-step" id="${itemId}-fishing">
+          <div class="research-step-header pending">
+            <span class="step-icon">○</span>
+            <span class="step-label">Fishing...</span>
+          </div>
+        </div>
+
+        <div class="research-result-section" id="${itemId}-tinyfish" style="display: none;">
+          <h4>TinyFish Research <span class="status loading">Waiting...</span></h4>
+          <div class="research-result-content"></div>
+        </div>
+
+        <div class="research-result-section" id="${itemId}-yutori" style="display: none;">
+          <h4>Yutori Research <span class="status loading">Waiting...</span></h4>
+          <div class="research-result-content"></div>
+        </div>
       </div>
-    ` : '';
+    `;
 
     content.insertBefore(item, content.firstChild);
     return itemId;
   }
 
-  function updateResearchItem(itemId, result) {
+  function updateResearchProgress(itemId, phase, data) {
     const item = document.getElementById(itemId);
     if (!item) return;
 
-    const questionPreview = result.question?.substring(0, 50) + (result.question?.length > 50 ? '...' : '');
+    switch (phase) {
+      case 'summarizing':
+        const summaryStep = document.getElementById(`${itemId}-summary`);
+        if (summaryStep) {
+          const header = summaryStep.querySelector('.research-step-header');
+          const content = summaryStep.querySelector('.research-step-content');
+          if (data.status === 'complete' && data.contextSummary) {
+            header.innerHTML = '<span class="step-icon complete">✓</span><span class="step-label">Context Summary</span>';
+            content.innerHTML = `<div class="context-summary">${escapeHtml(data.contextSummary)}</div>`;
+            content.style.display = 'block';
+            // Activate next step
+            const questionStep = document.getElementById(`${itemId}-question`);
+            if (questionStep) {
+              questionStep.querySelector('.research-step-header').classList.remove('pending');
+              questionStep.querySelector('.step-icon').innerHTML = '<div class="spinner"></div>';
+            }
+          }
+        }
+        break;
 
-    item.innerHTML = `
-      <div class="research-item-header" onclick="window.toggleResearchItem('${itemId}')">
-        <span class="research-item-question">${escapeHtml(questionPreview) || 'Error'}</span>
-        <span class="research-item-toggle">▼</span>
-      </div>
-      <div class="research-item-body">
-        <div class="research-question-full">${escapeHtml(result.question) || 'Could not synthesize question'}</div>
+      case 'synthesizing':
+        const questionStep = document.getElementById(`${itemId}-question`);
+        if (questionStep) {
+          const header = questionStep.querySelector('.research-step-header');
+          const content = questionStep.querySelector('.research-step-content');
+          if (data.status === 'complete' && data.question) {
+            header.innerHTML = '<span class="step-icon complete">✓</span><span class="step-label">Research Question</span>';
+            content.innerHTML = `<div class="research-question-full">${escapeHtml(data.question)}</div>`;
+            content.style.display = 'block';
+            // Update header preview
+            const headerQuestion = item.querySelector('.research-item-question');
+            if (headerQuestion) {
+              const preview = data.question.substring(0, 50) + (data.question.length > 50 ? '...' : '');
+              headerQuestion.textContent = preview;
+            }
+            // Activate fishing step
+            const fishingStep = document.getElementById(`${itemId}-fishing`);
+            if (fishingStep) {
+              fishingStep.querySelector('.research-step-header').classList.remove('pending');
+              fishingStep.querySelector('.step-icon').innerHTML = '<div class="spinner"></div>';
+            }
+          }
+        }
+        break;
 
-        <div class="research-result-section">
-          <h4>TinyFish Research <span class="status ${result.tinyfish?.success ? 'success' : 'error'}">
-            ${result.tinyfish?.success ? 'Complete' : 'Error'}</span></h4>
-          <div class="research-result-content">
-            ${formatResearchResult(result.tinyfish)}
-          </div>
-        </div>
+      case 'fishing':
+        // Show the result sections
+        document.getElementById(`${itemId}-tinyfish`).style.display = 'block';
+        document.getElementById(`${itemId}-yutori`).style.display = 'block';
+        break;
 
-        <div class="research-result-section">
-          <h4>Yutori Research <span class="status ${result.yutori?.success ? 'success' : 'error'}">
-            ${result.yutori?.success ? 'Complete' : 'Error'}</span></h4>
-          <div class="research-result-content">
-            ${formatResearchResult(result.yutori)}
-          </div>
-        </div>
-      </div>
-    `;
+      case 'tinyfish':
+        const tinyfishSection = document.getElementById(`${itemId}-tinyfish`);
+        if (tinyfishSection) {
+          const statusEl = tinyfishSection.querySelector('.status');
+          const contentEl = tinyfishSection.querySelector('.research-result-content');
+          statusEl.className = `status ${data.result?.success ? 'success' : 'error'}`;
+          statusEl.textContent = data.result?.success ? 'Complete' : 'Error';
+          contentEl.innerHTML = formatTinyfishResult(data.result);
+        }
+        // Mark fishing step as complete when tinyfish completes (since yutori is disabled)
+        const fishingStepTf = document.getElementById(`${itemId}-fishing`);
+        if (fishingStepTf) {
+          fishingStepTf.querySelector('.step-icon').innerHTML = '✓';
+          fishingStepTf.querySelector('.research-step-header').classList.remove('pending');
+          fishingStepTf.classList.add('completed');
+        }
+        break;
+
+      case 'yutori':
+        const yutoriSection = document.getElementById(`${itemId}-yutori`);
+        if (yutoriSection) {
+          const statusEl = yutoriSection.querySelector('.status');
+          const contentEl = yutoriSection.querySelector('.research-result-content');
+          // Handle disabled, success, or error status
+          const statusClass = data.status === 'disabled' ? 'disabled' : (data.result?.success ? 'success' : 'error');
+          const statusText = data.status === 'disabled' ? 'Disabled' : (data.result?.success ? 'Complete' : 'Error');
+          statusEl.className = `status ${statusClass}`;
+          statusEl.textContent = statusText;
+          contentEl.innerHTML = formatYutoriResult(data.result);
+        }
+        break;
+
+      case 'complete':
+        // Mark fishing step as complete
+        const fishingStep = document.getElementById(`${itemId}-fishing`);
+        if (fishingStep) {
+          fishingStep.querySelector('.step-icon').innerHTML = '✓';
+          fishingStep.querySelector('.step-icon').classList.add('complete');
+        }
+        break;
+    }
   }
 
   function escapeHtml(text) {
@@ -2114,21 +2213,163 @@ document.addEventListener('DOMContentLoaded', async () => {
     return div.innerHTML;
   }
 
-  function formatResearchResult(result) {
+  function formatTinyfishResult(result) {
     if (!result) return '<em>No response</em>';
-    if (!result.success) return `<em>Error: ${escapeHtml(result.error) || 'Unknown error'}</em>`;
+    if (!result.success) return `<div class="error-message">${escapeHtml(result.error) || 'Unknown error'}</div>`;
 
-    let text;
-    if (typeof result.result === 'object' && result.result !== null) {
-      text = JSON.stringify(result.result, null, 2);
-    } else {
-      text = result.result;
+    const data = result.result;
+    if (!data) return '<em>Empty response</em>';
+
+    // Check if it's the AWS agentic AI format
+    if (data.aws_agentic_ai_repositories || data.summary) {
+      return formatAwsAgenticResponse(data);
     }
 
+    // Try to format as structured data
+    if (typeof data === 'object') {
+      return formatGenericJson(data);
+    }
+
+    // Plain text
+    return `<div class="text-result">${escapeHtml(String(data)).replace(/\n/g, '<br>')}</div>`;
+  }
+
+  function formatGenericJson(data) {
+    let html = '<div class="json-formatted">';
+
+    // Handle arrays
+    if (Array.isArray(data)) {
+      data.forEach((item, index) => {
+        html += `<div class="json-array-item">`;
+        if (typeof item === 'object' && item !== null) {
+          html += formatJsonObject(item);
+        } else {
+          html += `<span class="json-value">${escapeHtml(String(item))}</span>`;
+        }
+        html += `</div>`;
+      });
+    } else {
+      html += formatJsonObject(data);
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function formatJsonObject(obj) {
+    let html = '<div class="json-object">';
+
+    for (const [key, value] of Object.entries(obj)) {
+      const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+
+      html += `<div class="json-field">`;
+      html += `<span class="json-key">${escapeHtml(formattedKey)}</span>`;
+
+      if (value === null || value === undefined) {
+        html += `<span class="json-value json-null">—</span>`;
+      } else if (typeof value === 'boolean') {
+        html += `<span class="json-value json-bool">${value ? '✓ Yes' : '✗ No'}</span>`;
+      } else if (typeof value === 'number') {
+        html += `<span class="json-value json-number">${value.toLocaleString()}</span>`;
+      } else if (typeof value === 'string') {
+        // Check if it's a URL
+        if (value.match(/^https?:\/\//)) {
+          html += `<a href="${escapeHtml(value)}" target="_blank" rel="noopener" class="json-value json-link">${escapeHtml(value)}</a>`;
+        } else if (value.length > 200) {
+          html += `<div class="json-value json-text-long">${escapeHtml(value)}</div>`;
+        } else {
+          html += `<span class="json-value json-text">${escapeHtml(value)}</span>`;
+        }
+      } else if (Array.isArray(value)) {
+        if (value.length === 0) {
+          html += `<span class="json-value json-empty">Empty list</span>`;
+        } else if (typeof value[0] === 'string' || typeof value[0] === 'number') {
+          // Array of primitives - show as tags
+          html += `<div class="json-value json-tags">${value.map(v => `<span class="tag">${escapeHtml(String(v))}</span>`).join('')}</div>`;
+        } else {
+          // Array of objects - recursive
+          html += `<div class="json-value json-nested">`;
+          value.forEach(item => {
+            html += `<div class="json-nested-item">${formatJsonObject(item)}</div>`;
+          });
+          html += `</div>`;
+        }
+      } else if (typeof value === 'object') {
+        html += `<div class="json-value json-nested">${formatJsonObject(value)}</div>`;
+      }
+
+      html += `</div>`;
+    }
+
+    html += '</div>';
+    return html;
+  }
+
+  function formatAwsAgenticResponse(data) {
+    let html = '';
+
+    // Summary at the top
+    if (data.summary) {
+      html += `<div class="result-summary">${escapeHtml(data.summary)}</div>`;
+    }
+
+    // Repositories
+    if (data.aws_agentic_ai_repositories && data.aws_agentic_ai_repositories.length > 0) {
+      html += '<div class="repos-section"><h5>AWS Agentic AI Repositories</h5>';
+      data.aws_agentic_ai_repositories.forEach(repo => {
+        html += `
+          <div class="repo-card">
+            <div class="repo-name">
+              <a href="${escapeHtml(repo.link)}" target="_blank" rel="noopener">${escapeHtml(repo.name)}</a>
+            </div>
+            <div class="repo-description">${escapeHtml(repo.description)}</div>
+            ${repo.focus ? `<div class="repo-tags">${repo.focus.map(f => `<span class="tag">${escapeHtml(f)}</span>`).join('')}</div>` : ''}
+          </div>
+        `;
+      });
+      html += '</div>';
+    }
+
+    // MCP Server Patterns
+    if (data.mcp_server_patterns) {
+      html += '<div class="patterns-section"><h5>MCP Server Patterns</h5>';
+      if (data.mcp_server_patterns.implementation) {
+        html += `<div class="pattern-item"><strong>Implementation:</strong> ${escapeHtml(data.mcp_server_patterns.implementation)}</div>`;
+      }
+      if (data.mcp_server_patterns.cost_analytics) {
+        html += `<div class="pattern-item"><strong>Cost Analytics:</strong> ${escapeHtml(data.mcp_server_patterns.cost_analytics)}</div>`;
+      }
+      html += '</div>';
+    }
+
+    // Relevant Blog
+    if (data.relevant_blog) {
+      html += `
+        <div class="blog-section">
+          <h5>Related Resource</h5>
+          <a href="${escapeHtml(data.relevant_blog.link)}" target="_blank" rel="noopener">${escapeHtml(data.relevant_blog.title)}</a>
+        </div>
+      `;
+    }
+
+    return html || '<em>No structured data</em>';
+  }
+
+  function formatYutoriResult(result) {
+    if (!result) return '<em>No response</em>';
+    if (!result.success) return `<div class="error-message">${escapeHtml(result.error) || 'Unknown error'}</div>`;
+
+    const text = result.result;
     if (!text) return '<em>Empty response</em>';
 
-    // Escape HTML and convert newlines to <br>
-    return escapeHtml(text).replace(/\n/g, '<br>');
+    // Yutori returns markdown, convert basic formatting
+    let html = escapeHtml(text)
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    return `<div class="markdown-content"><p>${html}</p></div>`;
   }
 
   // Make toggleResearchItem available globally for onclick
@@ -2171,31 +2412,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Open pane and add loading item
       openResearchPane();
-      const itemId = addResearchItem({ loading: true });
+      currentResearchItemId = addResearchItem({ loading: true });
 
       try {
         const result = await window.electronAPI.researchQuestion(currentEditingMeetingId);
-
-        if (result.success) {
-          updateResearchItem(itemId, result);
-        } else {
-          updateResearchItem(itemId, {
-            question: 'Error',
-            tinyfish: { success: false, error: result.error || 'Unknown error' },
-            yutori: { success: false, error: result.error || 'Unknown error' }
-          });
+        // Final result handled by progress events, but update if needed
+        if (!result.success) {
+          updateResearchProgress(currentResearchItemId, 'error', { error: result.error });
         }
       } catch (error) {
         console.error('Error researching question:', error);
-        updateResearchItem(itemId, {
-          question: 'Error',
-          tinyfish: { success: false, error: error.message || 'Unknown error' },
-          yutori: { success: false, error: error.message || 'Unknown error' }
-        });
+        updateResearchProgress(currentResearchItemId, 'error', { error: error.message });
       } finally {
         researchButton.innerHTML = originalHTML;
         researchButton.classList.remove('loading');
         researchButton.disabled = false;
+        currentResearchItemId = null;
       }
     });
   }
@@ -2209,7 +2441,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Listen for research progress updates
   window.electronAPI.onResearchProgress((data) => {
     console.log('Research progress:', data);
-    // Could update the loading item with the synthesized question here if needed
+    if (currentResearchItemId && data.phase) {
+      updateResearchProgress(currentResearchItemId, data.phase, data);
+    }
   });
 
   // ============== End Research Question Feature ==============
