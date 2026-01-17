@@ -48,9 +48,6 @@ const MODELS = {
   FALLBACKS: []
 };
 
-// Research API endpoints
-const YUTORI_API_URL = 'https://api.yutori.com/v1/research/tasks';
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
@@ -1184,9 +1181,6 @@ ipcMain.handle('researchQuestion', async (event, meetingId, requestId) => {
       return result;
     });
 
-    const yutoriResult = { success: false, error: 'Yutori temporarily disabled' };
-    sendProgress('yutori', { status: 'disabled', result: yutoriResult });
-
     sendProgress('complete', {});
 
     const result = {
@@ -1194,8 +1188,7 @@ ipcMain.handle('researchQuestion', async (event, meetingId, requestId) => {
       question,
       contextSummary,
       recentTranscript: recentTranscript.map(e => `${e.speaker}: ${e.text}`).join('\n'),
-      groq: groqResult,
-      yutori: yutoriResult
+      groq: groqResult
     };
 
     console.log('Research completed:', {
@@ -1809,17 +1802,29 @@ function extractRecentTranscript(transcript, seconds = 30) {
   return recentEntries;
 }
 
-// Generate a quick context summary of the entire meeting
+// Generate a quick context summary of the entire meeting (using Groq for fast inference)
 async function generateMeetingContext(transcript) {
   if (!transcript || transcript.length === 0) return null;
+
+  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
+  if (!GROQ_API_KEY) {
+    console.error('GROQ_API_KEY not configured for context summary');
+    return null;
+  }
 
   const transcriptText = transcript.map(entry =>
     `${entry.speaker}: ${entry.text}`
   ).join('\n');
 
   try {
-    const response = await openai.chat.completions.create({
-      model: MODELS.PRIMARY,
+    const OpenAI = require('openai');
+    const groq = new OpenAI({
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: GROQ_API_KEY
+    });
+
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: "system",
@@ -1841,15 +1846,27 @@ async function generateMeetingContext(transcript) {
   }
 }
 
-// Synthesize a research question from meeting context and recent transcript
+// Synthesize a research question from meeting context and recent transcript (using Groq for fast inference)
 async function synthesizeResearchQuestion(contextSummary, recentTranscript) {
+  const GROQ_API_KEY = process.env.GROQ_API_KEY?.trim();
+  if (!GROQ_API_KEY) {
+    console.error('GROQ_API_KEY not configured for question synthesis');
+    return null;
+  }
+
   const recentText = recentTranscript.map(entry =>
     `${entry.speaker}: ${entry.text}`
   ).join('\n');
 
   try {
-    const response = await openai.chat.completions.create({
-      model: MODELS.PRIMARY,
+    const OpenAI = require('openai');
+    const groq = new OpenAI({
+      baseURL: 'https://api.groq.com/openai/v1',
+      apiKey: GROQ_API_KEY
+    });
+
+    const response = await groq.chat.completions.create({
+      model: 'llama-3.1-8b-instant',
       messages: [
         {
           role: "system",
@@ -1874,62 +1891,6 @@ Return ONLY the question, nothing else. Do not include any preamble or explanati
   } catch (error) {
     console.error('Error synthesizing research question:', error);
     return null;
-  }
-}
-
-// Query Yutori Research API
-async function queryYutori(question) {
-  const YUTORI_API_KEY = process.env.YUTORI_API_KEY;
-  if (!YUTORI_API_KEY) {
-    return { success: false, error: 'YUTORI_API_KEY not configured in environment' };
-  }
-
-  try {
-    // Create research task
-    const createResponse = await axios.post(YUTORI_API_URL,
-      { query: question },
-      {
-        headers: {
-          'X-API-Key': YUTORI_API_KEY,
-          'Content-Type': 'application/json'
-        }
-      }
-    );
-
-    const taskId = createResponse.data.task_id;
-    console.log('Yutori task created:', taskId);
-
-    // Poll for completion (max 60 seconds, every 3 seconds)
-    const maxAttempts = 20;
-    for (let i = 0; i < maxAttempts; i++) {
-      await new Promise(resolve => setTimeout(resolve, 3000));
-
-      const statusResponse = await axios.get(
-        `${YUTORI_API_URL}/${taskId}`,
-        { headers: { 'X-API-Key': YUTORI_API_KEY } }
-      );
-
-      console.log('Yutori task status:', statusResponse.data.status);
-
-      if (statusResponse.data.status === 'succeeded') {
-        return {
-          success: true,
-          result: statusResponse.data.result,
-          structured: statusResponse.data.structured_result
-        };
-      } else if (statusResponse.data.status === 'failed') {
-        return { success: false, error: 'Yutori research task failed' };
-      }
-      // Continue polling if 'queued' or 'running'
-    }
-
-    return { success: false, error: 'Yutori research timed out after 60 seconds' };
-  } catch (error) {
-    console.error('Error querying Yutori:', error.response?.data || error.message);
-    return {
-      success: false,
-      error: error.response?.data?.message || error.message
-    };
   }
 }
 

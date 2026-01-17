@@ -2095,11 +2095,6 @@ document.addEventListener('DOMContentLoaded', async () => {
           <h4>Groq (Instant) <span class="status loading">Waiting...</span></h4>
           <div class="research-result-content"></div>
         </div>
-
-        <div class="research-result-section" id="${itemId}-yutori" style="display: none;">
-          <h4>Yutori Research <span class="status loading">Waiting...</span></h4>
-          <div class="research-result-content"></div>
-        </div>
       </div>
     `;
 
@@ -2157,9 +2152,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         break;
 
       case 'fishing':
-        // Show the result sections
+        // Show the result section
         document.getElementById(`${itemId}-groq`).style.display = 'block';
-        document.getElementById(`${itemId}-yutori`).style.display = 'block';
         break;
 
       case 'groq':
@@ -2171,26 +2165,12 @@ document.addEventListener('DOMContentLoaded', async () => {
           statusEl.textContent = data.result?.success ? 'Complete' : 'Error';
           contentEl.innerHTML = formatGroqResult(data.result);
         }
-        // Mark fishing step as complete when groq completes (since yutori is disabled)
+        // Mark fishing step as complete when groq completes
         const fishingStepGroq = document.getElementById(`${itemId}-fishing`);
         if (fishingStepGroq) {
           fishingStepGroq.querySelector('.step-icon').innerHTML = '✓';
           fishingStepGroq.querySelector('.research-step-header').classList.remove('pending');
           fishingStepGroq.classList.add('completed');
-        }
-        break;
-
-      case 'yutori':
-        const yutoriSection = document.getElementById(`${itemId}-yutori`);
-        if (yutoriSection) {
-          const statusEl = yutoriSection.querySelector('.status');
-          const contentEl = yutoriSection.querySelector('.research-result-content');
-          // Handle disabled, success, or error status
-          const statusClass = data.status === 'disabled' ? 'disabled' : (data.result?.success ? 'success' : 'error');
-          const statusText = data.status === 'disabled' ? 'Disabled' : (data.result?.success ? 'Complete' : 'Error');
-          statusEl.className = `status ${statusClass}`;
-          statusEl.textContent = statusText;
-          contentEl.innerHTML = formatYutoriResult(data.result);
         }
         break;
 
@@ -2352,23 +2332,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     return html || '<em>No structured data</em>';
-  }
-
-  function formatYutoriResult(result) {
-    if (!result) return '<em>No response</em>';
-    if (!result.success) return `<div class="error-message">${escapeHtml(result.error) || 'Unknown error'}</div>`;
-
-    const text = result.result;
-    if (!text) return '<em>Empty response</em>';
-
-    // Yutori returns markdown, convert basic formatting
-    let html = escapeHtml(text)
-      .replace(/\n\n/g, '</p><p>')
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-    return `<div class="markdown-content"><p>${html}</p></div>`;
   }
 
   // Make toggleResearchItem available globally for onclick
